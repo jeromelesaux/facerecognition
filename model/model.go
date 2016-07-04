@@ -5,7 +5,6 @@ import (
 	"facedetection/facedetector"
 	"fmt"
 	"github.com/KatyBlumer/Go-Eigenface-Face-Distance/eigenface"
-	"github.com/KatyBlumer/Go-Eigenface-Face-Distance/faceimage"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -92,7 +91,7 @@ func (u *UserFace) DetectFaces(images []string) {
 }
 
 func (u *UserFace) SaveAverageFace() {
-	img := faceimage.ToImage(u.AverageFace)
+	img := ToImage(u.AverageFace)
 	out, err := os.Create(DataPath + string(filepath.Separator) + u.GetKey() + string(filepath.Separator) + "average.png")
 	if err != nil {
 		fmt.Println(err)
@@ -107,7 +106,7 @@ func (u *UserFace) SaveAverageFace() {
 }
 func (u *UserFace) SaveNormalizedFaces() {
 	for index, face := range u.Faces {
-		img := faceimage.ToImage(face)
+		img := ToImage(face)
 		out, err := os.Create(DataPath + string(filepath.Separator) + u.GetKey() + string(filepath.Separator) + strconv.Itoa(index) + "_normalized.png")
 		if err != nil {
 			fmt.Println(err)
@@ -126,11 +125,39 @@ func (u *UserFace) SaveNormalizedFaces() {
 func (u *UserFace) TrainFaces() {
 	faces := make([]eigenface.FaceVector, len(u.TrainingImages))
 	for index, imagePath := range u.TrainingImages {
-		faces[index] = faceimage.ToVector(imagePath)
+		faces[index] = ToVector(imagePath)
 	}
 
 	u.Faces = eigenface.Normalize(faces)
 	u.AverageFace = eigenface.Average(faces)
-
+	u.SaveAverageFace()
+	u.SaveNormalizedFaces()
+	fmt.Println(u.AverageFace)
 	return
+}
+
+func (u *UsersLib) RecognizeFace(imagePath string) {
+	f := facedetector.NewFaceDetector(imagePath)
+	_, err := os.Stat("tmp")
+	if err != nil {
+		os.MkdirAll("tmp", os.ModePerm)
+	}
+	filespaths := f.DrawImageInDirectory("tmp")
+	facesDetected := make([]eigenface.FaceVector, 0)
+	for _, filePath := range filespaths {
+		fvector := ToVector(filePath)
+		facesDetected = append(facesDetected, fvector)
+	}
+	for key, userFace := range u.UsersFace {
+		for _, fvector := range facesDetected {
+			train := make([]eigenface.FaceVector, len(userFace.Faces)+1)
+			train = append(train, userFace.Faces...)
+			train = append(train, fvector)
+			result := eigenface.Average(train)
+			fmt.Println(result)
+			if result.Width == 0 && result.Height == 0 {
+				fmt.Println(imagePath + " contains " + key)
+			}
+		}
+	}
 }
