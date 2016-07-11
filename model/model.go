@@ -3,8 +3,9 @@ package model
 import (
 	"encoding/json"
 	"facedetection/facedetector"
+	"facerecognition/eigen"
 	"fmt"
-	"github.com/KatyBlumer/Go-Eigenface-Face-Distance/eigenface"
+	"image"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -104,6 +105,22 @@ func (u *UserFace) SaveAverageFace() {
 		return
 	}
 }
+
+func SaveImageTo(img *image.Gray16, path string) {
+	out, err := os.Create(path)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer out.Close()
+
+	err = png.Encode(out, img)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
 func (u *UserFace) SaveNormalizedFaces() {
 	for index, face := range u.Faces {
 		img := ToImage(face)
@@ -132,7 +149,7 @@ func (u *UserFace) TrainFaces() {
 	u.AverageFace = eigenface.Average(faces)
 	u.SaveAverageFace()
 	u.SaveNormalizedFaces()
-	fmt.Println(u.AverageFace)
+
 	return
 }
 
@@ -148,16 +165,92 @@ func (u *UsersLib) RecognizeFace(imagePath string) {
 		fvector := ToVector(filePath)
 		facesDetected = append(facesDetected, fvector)
 	}
+	averageFace := eigenface.Average(facesDetected)
+
 	for key, userFace := range u.UsersFace {
-		for _, fvector := range facesDetected {
-			train := make([]eigenface.FaceVector, len(userFace.Faces)+1)
-			train = append(train, userFace.Faces...)
-			train = append(train, fvector)
-			result := eigenface.Average(train)
-			fmt.Println(result)
-			if result.Width == 0 && result.Height == 0 {
-				fmt.Println(imagePath + " contains " + key)
+
+		result := eigenface.Difference(userFace.AverageFace, averageFace)
+		fmt.Println(strconv.Itoa(result.Height) + ":" + strconv.Itoa(result.Width))
+		if result.Width == 0 && result.Height == 0 {
+			fmt.Println(imagePath + " contains " + key)
+		}
+
+	}
+}
+func (u *UsersLib) CompareFace(facepath string) {
+	facevector := ToVector(facepath)
+	facesVector := make([]eigenface.FaceVector, 0)
+	facesVector = append(facesVector, facevector)
+	averageFace := eigenface.Average(facesVector)
+
+	SaveImageTo(ToImage(averageFace), "tmp/average_barrack.png")
+	//for key, userFace := range u.UsersFace {
+	//
+	//	fvs := eigenface.NewFaceVectors(userFace.AverageFace.Height, userFace.AverageFace.Width, len(userFace.Faces))
+	//	fvs.Pixels = userFace.Faces
+	//	fvs.Train()
+	//
+	//	distance := fvs.ComputeDistance(facevector)
+	//
+	//	fmt.Println(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//	//distance := eigenface.ComputeDistance(userFace.AverageFace.Pixels, averageFace.Pixels)
+	//	////distance := userFace.LevenshteinDistance(averageFace)
+	//	//fmt.Println(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//	////faceVectorAv := eigenface.Average(faces)
+	//	////fmt.Println(key + " " + faceVectorAv.ToString())
+	//	//diffVector := eigenface.Difference(userFace.AverageFace, averageFace)
+	//	//distance = eigenface.ComputeDistance(diffVector.Pixels, userFace.AverageFace.Pixels)
+	//	//fmt.Println(key + " diff Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//}
+}
+
+func (u *UserFace) LevenshteinDistance(face1 eigenface.FaceVector) float64 {
+	s1 := len(face1.Pixels)
+	s2 := len(u.AverageFace.Pixels)
+	if s1 == 0 {
+		return 0
+	}
+	if s2 == 0 {
+		return 0
+	}
+	matrix1 := make([]float64, s1)
+	matrix2 := make([]float64, s2)
+
+	for i := 0; i < s2; i++ {
+		matrix1[i] = float64(i)
+	}
+	for i := 0; i < s1-1; i++ {
+		matrix2[0] = float64(i + 1)
+		for j := 0; j < s2-1; j++ {
+			cost := 1.
+			if face1.Pixels[i] == u.AverageFace.Pixels[j] {
+				cost = 0.
 			}
+			matrix2[j+1] = MIN(matrix2[j]+1, matrix1[j+1]+1, matrix1[j]+cost)
+		}
+
+		for j := 0; j < len(matrix2); j++ {
+			matrix1[j] = matrix2[j]
+		}
+
+	}
+
+	return matrix2[s2-1]
+}
+
+func MIN(a, b, c float64) float64 {
+	if a > b {
+		if b > c {
+			return c
+		} else {
+			return b
+		}
+	} else {
+		if a > c {
+			return c
+		} else {
+			return a
 		}
 	}
+
 }

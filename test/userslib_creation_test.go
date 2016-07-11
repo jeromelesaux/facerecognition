@@ -1,6 +1,7 @@
 package test
 
 import (
+	"facerecognition/eigen"
 	"facerecognition/model"
 	_ "image/png"
 	"testing"
@@ -46,4 +47,17 @@ func TestBarrackDetectiong(t *testing.T) {
 	uf.DetectFaces(images)
 	uf.TrainFaces()
 	ul.AddUserFace(uf)
+}
+
+func TestCompareBarrack(t *testing.T) {
+	ul := model.GetUsersLib()
+	barrackVector := model.ToVector("images/barrack_face.png")
+	for key, person := range ul.UsersFace {
+		average := eigenface.Difference(barrackVector, person.AverageFace)
+
+		i := model.ToImage(average)
+		model.SaveImageTo(i, "tmp/barrack_"+key+".png")
+		model.SaveImageTo(model.ToImage(person.AverageFace), "tmp/"+key+".png")
+
+	}
 }
