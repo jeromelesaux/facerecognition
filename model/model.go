@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -89,6 +90,14 @@ func (u *UserFace) DetectFaces(images []string) {
 		u.TrainingImages = append(u.TrainingImages, filespaths...)
 	}
 	return
+}
+
+func SumPixels(face eigenface.FaceVector) float64 {
+	sum := 0.
+	for i := 0; i < (face.Width * face.Height); i++ {
+		sum += face.Pixels[i]
+	}
+	return math.Abs(sum / float64(face.Width*face.Height) / 0xffff)
 }
 
 func (u *UserFace) SaveAverageFace() {
