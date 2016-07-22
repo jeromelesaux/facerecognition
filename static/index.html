@@ -1,58 +1,141 @@
 <html>
 <style>
-    body { padding: 30px }
-    form { display: block; margin: 20px auto; background: #eee; border-radius: 10px; padding: 15px }
+    body {
+        padding: 30px
+    }
 
-    .progress { position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px; }
-    .bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; }
-    .percent { position:absolute; display:inline-block; top:3px; left:48%; }
+    form {
+        display: block;
+        margin: 20px auto;
+        background: #eee;
+        border-radius: 10px;
+        padding: 15px
+    }
+
+    .progress {
+        position: relative;
+        width: 400px;
+        border: 1px solid #ddd;
+        padding: 1px;
+        border-radius: 3px;
+    }
+
+    .bar {
+        background-color: #B4F5B4;
+        width: 0%;
+        height: 20px;
+        border-radius: 3px;
+    }
+
+    .percent {
+        position: absolute;
+        display: inline-block;
+        top: 3px;
+        left: 48%;
+    }
 </style>
 <body>
-<form action="train" method="post" enctype="multipart/form-data">
-    <input type="file" name="myfile[]" multiple><br>
-    <input type="submit" value="Upload File to Server">
-</form>
 
-<div class="progress">
-    <div class="bar"></div >
-    <div class="percent">0%</div >
-</div>
-
-<div id="status"></div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
+
+<div class="progress">
+    <div class="bar"></div>
+    <div class="percent">0%</div>
+</div>
+
+<div id="status_bar"></div>
+
 <script>
-    (function() {
+    (function () {
 
         var bar = $('.bar');
         var percent = $('.percent');
-        var status = $('#status');
+        var status = $('#status_bar');
 
         $('form').ajaxForm({
-            beforeSend: function() {
+            beforeSend: function () {
+                $('#error_server').empty();
+                $('#user_recognized').empty();
+                $('#user_average').empty();
                 status.empty();
                 var percentVal = '0%';
-                bar.width(percentVal)
+                bar.width(percentVal);
                 percent.html(percentVal);
             },
-            uploadProgress: function(event, position, total, percentComplete) {
+            uploadProgress: function (event, position, total, percentComplete) {
                 var percentVal = percentComplete + '%';
-                bar.width(percentVal)
+                bar.width(percentVal);
                 percent.html(percentVal);
-                //console.log(percentVal, position, total);
+                //  console.log(percentVal, position, total);
             },
-            success: function() {
+            success: function (e) {
                 var percentVal = '100%';
-                bar.width(percentVal)
+                bar.width(percentVal);
                 percent.html(percentVal);
+                obj = jQuery.parseJSON(e);
+//                console.log(e);
+                console.log(obj);
+                if (obj.error != "") {
+                    $('#error_server').html(obj.error)
+                            .css('color', 'red')
+                            .css('font-size', '30px');
+                }
+                if (obj.average != "") {
+                    $('#user_average').html('<img src="data:image/png;base64,' + obj.average + '"/>');
+                }
+                if (obj.person_recognized != "") {
+                   $('#user_recognized').html(obj.person_recognized)
+                           .ccs('font-size', '20px')
+                }
+                $('#user_firstname').html("First Name :" + obj.user.first_name);
+                $('#user_lastname').html("Last Name : " + obj.user.last_name);
+
             },
-            complete: function(xhr) {
-                status.html(xhr.responseText);
+            complete: function (xhr) {
+                status.html('Action completed.');
             }
         });
 
     })();
 </script>
+
+
+<div id="error_server" style="text-align: center"></div>
+<div id="user_recognized"></div>
+<div id="user_average"></div>
+<div id="user_firstname"></div>
+<div id="user_lastname"></div>
+
+
+<form method="post" enctype="multipart/form-data" action="train">
+    <h2>Training</h2>
+    <table border="0">
+        <tr>
+            <td><h3>First name</h3></td>
+            <td><input type="text" name="first_name" value=""></td>
+        </tr>
+        <tr>
+            <td><h3>Last name</h3></td>
+            <td><input type="text" name="last_name" value=""></td>
+        </tr>
+        <tr>
+            <td><input type="file" name="myfile[]" multiple value="choose the photos"><br></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="add this new person"></td>
+        </tr>
+
+    </table>
+</form>
+
+<form method="post" enctype="multipart/form-data" action="compare">
+    <h2>Finding</h2>
+    <input type="file" name="myfile" value="choose the photo"><br>
+    <input type="submit" value="find">
+</form>
+
+
 </body>
 </html>

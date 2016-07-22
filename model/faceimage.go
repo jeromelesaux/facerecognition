@@ -15,6 +15,28 @@ var (
 	Width  = 100
 )
 
+func StreamToVector(img image.Image) eigenface.FaceVector {
+	i := Resize(img)
+	width := i.Bounds().Max.X - i.Bounds().Min.X
+	height := i.Bounds().Max.Y - i.Bounds().Min.Y
+	minX := i.Bounds().Min.X
+	minY := i.Bounds().Min.Y
+
+	face := eigenface.FaceVector{Height: Height, Width: Width}
+	face.Pixels = make([]float64, face.Width*face.Height)
+
+	// iterate through image row by row
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			color := i.At(x-minX, y-minY)
+			// ORL database images are 16-bit grayscale, so can use any of RGB values
+			value, _, _, _ := color.RGBA()
+			face.Pixels[(y*width)+x] = float64(value)
+		}
+	}
+	return face
+}
+
 func ToVector(path string) eigenface.FaceVector {
 	f, err := os.Open(path)
 	if err != nil {
