@@ -24,6 +24,7 @@ type UserFace struct {
 	Faces          []eigenface.FaceVector `json:"eigenfaces"`
 	AverageFace    eigenface.FaceVector   `json:"average_face"`
 	TrainingImages []string               `json:"training_images"`
+	FacesDetected  []eigenface.FaceVector `json:"faces_detected"`
 }
 
 type UsersLib struct {
@@ -207,8 +208,12 @@ func (u *UsersLib) RecognizeFaceFromImage(image image.Image) *UserFace {
 	}
 	fd := facedetector.NewFaceDectectorFromImage(image)
 	filespaths := fd.DrawImageInDirectory("tmp")
+	facesDetected := make([]eigenface.FaceVector, 0)
 	for _, file := range filespaths {
 		imageVector := ToVector(file)
+		if imageVector.Height > 0 && imageVector.Width > 0 {
+			facesDetected = append(facesDetected, imageVector)
+		}
 		for key, person := range u.UsersFace {
 			fmt.Println("Compare with " + key)
 			if len(person.AverageFace.Pixels) == 0 {
@@ -228,6 +233,8 @@ func (u *UsersLib) RecognizeFaceFromImage(image image.Image) *UserFace {
 		}
 	}
 	fmt.Println(faceFound + " seems to be the person you're looking for with value: " + strconv.FormatFloat(sumConserved, 'f', 10, 64))
+
+	faceFoundVector.FacesDetected = facesDetected
 	return faceFoundVector
 }
 
@@ -241,7 +248,7 @@ func (u *UsersLib) RecognizeFace(imagePath string) *UserFace {
 		os.MkdirAll("tmp", os.ModePerm)
 	}
 	fd := facedetector.NewFaceDetector(imagePath)
-	filespaths := fd.DrawImageInDirectory("tmp/")
+	filespaths := fd.DrawImageInDirectory("tmp")
 	for _, file := range filespaths {
 		imageVector := ToVector(file)
 		for key, person := range u.UsersFace {

@@ -22,6 +22,7 @@ type FaceRecognitionResponse struct {
 	Error            string     `json:"error,ompitempty"`
 	User             model.User `json:"user"`
 	Average          string     `json:"average"`
+	FaceDetected     []string   `json:"faces_detected"`
 	PersonRecognized string     `json:"person_recognized"`
 }
 
@@ -59,6 +60,10 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 				if faceFound.User.LastName != "" && faceFound.User.FirstName != "" {
 					user.FirstName = faceFound.User.FirstName
 					user.LastName = faceFound.User.LastName
+					response.FaceDetected = make([]string, 0)
+					for _, f := range faceFound.FacesDetected {
+						response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
+					}
 					response.User = *user
 					response.Average = faceVectorToBase64(faceFound.AverageFace)
 					response.PersonRecognized = "It seems to be " + faceFound.GetKey()
