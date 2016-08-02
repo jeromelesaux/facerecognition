@@ -128,6 +128,7 @@ func SumPixels(face eigenface.FaceVector) float64 {
 	for i := 0; i < (face.Width * face.Height); i++ {
 		sum += face.Pixels[i]
 	}
+
 	return math.Abs(sum / float64(face.Width*face.Height) / 0xffff)
 }
 
@@ -189,6 +190,7 @@ func (u *UserFace) TrainFaces() {
 		faces[index] = ToVector(imagePath)
 	}
 
+	u.FacesDetected = faces
 	u.Faces = eigenface.Normalize(faces)
 	u.AverageFace = eigenface.Average(faces)
 	u.SaveAverageFace()
@@ -219,8 +221,9 @@ func (u *UsersLib) RecognizeFaceFromImage(image image.Image) *UserFace {
 			if len(person.AverageFace.Pixels) == 0 {
 				continue
 			}
-			average := eigenface.Difference(imageVector, person.AverageFace)
+			average := eigenface.Difference(person.AverageFace, imageVector)
 			sum := SumPixels(average)
+
 			if sum < sumConserved && sum < 0.05 {
 				sumConserved = sum
 				faceFound = key
@@ -236,6 +239,21 @@ func (u *UsersLib) RecognizeFaceFromImage(image image.Image) *UserFace {
 
 	faceFoundVector.FacesDetected = facesDetected
 	return faceFoundVector
+}
+
+func (u *UserFace) ComputeRecognizeDistance(face eigenface.FaceVector) float64 {
+	distance := 0.
+	nbImages := len(u.Faces)
+	nbPixels := len(u.Faces[0].Pixels)
+	for i := 0; i < nbPixels; i++ {
+		tmp := 0.
+		for j := 0; j < nbImages; j++ {
+			tmp += u.Faces[j].Pixels[i] - face.Pixels[i]
+		}
+		distance += math.Pow(tmp/float64(nbPixels), 2)
+	}
+
+	return math.Sqrt(distance) / float64(nbImages)
 }
 
 func (u *UsersLib) RecognizeFace(imagePath string) *UserFace {
@@ -255,8 +273,9 @@ func (u *UsersLib) RecognizeFace(imagePath string) *UserFace {
 			if len(person.AverageFace.Pixels) == 0 {
 				continue
 			}
-			average := eigenface.Difference(imageVector, person.AverageFace)
+			average := eigenface.Difference(person.AverageFace, imageVector)
 			sum := SumPixels(average)
+
 			if sum < sumConserved && sum < 0.05 {
 				sumConserved = sum
 				faceFound = key

@@ -44,7 +44,7 @@ func (f *FaceVectors) Train() {
 	f.ComputeMean()
 	f.ComputeDifferenceMatrixPixels()
 	f.ComputeCovarianceMatrix()
-
+	//weightFace := f.ComputeWeights(f.Mean)
 	//f.ComputeEigenFaces()
 }
 

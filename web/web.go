@@ -67,6 +67,8 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 					response.User = *user
 					response.Average = faceVectorToBase64(faceFound.AverageFace)
 					response.PersonRecognized = "It seems to be " + faceFound.GetKey()
+				} else {
+					response.Error = "Not recognized."
 				}
 			}
 		}
@@ -135,6 +137,10 @@ func Training(w http.ResponseWriter, r *http.Request) {
 		userFace.TrainFaces()
 		userslib.AddUserFace(userFace)
 		response.Average = faceVectorToBase64(userFace.AverageFace)
+		response.FaceDetected = make([]string, 0)
+		for _, f := range userFace.FacesDetected {
+			response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
+		}
 	}
 
 	response.User = *user

@@ -59,6 +59,7 @@
                 $('#error_server').empty();
                 $('#user_recognized').empty();
                 $('#user_average').empty();
+                $('#user_detected').empty();
                 status.empty();
                 var percentVal = '0%';
                 bar.width(percentVal);
@@ -88,7 +89,7 @@
                 if (obj.faces_detected.length > 0) {
                     var detectedHtml = "";
                     for (var i = 0; i < obj.faces_detected.length; i++)
-                        detectedHtml += 'Face found ' + (i + 1) + '<img src="data:image/png;base64,' + obj.faces_detected[i] + '"/><br>';
+                        detectedHtml += 'Face found ' + (i + 1) + '<img src="data:image/png;base64,' + obj.faces_detected[i] + '"/>';
                     $('#user_detected').html(detectedHtml);
                 }
                 if (obj.person_recognized != "") {
