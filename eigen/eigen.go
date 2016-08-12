@@ -1,9 +1,10 @@
 package eigenface
 
-//import "github.com/gonum/matrix/mat64"
 import (
+	"github.com/skelterjohn/go.matrix"
 	"math"
 	"strconv"
+	"fmt"
 )
 
 type FaceVector struct {
@@ -16,9 +17,10 @@ type FaceVectors struct {
 	Width  int
 	Pixels []FaceVector
 	Mean   FaceVector
+	Weight FaceVector
 	Diff   []FaceVector
-	Cov    []FaceVector
-	//Eigen  []FaceVector
+	Cov    [][]float64
+	Eigen  [][]float64
 }
 
 func makeArray(length int) []float64 {
@@ -29,7 +31,9 @@ func NewFaceVectors(height, width int, nbImage int) *FaceVectors {
 	facevectors := &FaceVectors{Height: height, Width: width}
 	facevectors.Pixels = make([]FaceVector, nbImage)
 	facevectors.Diff = make([]FaceVector, nbImage)
-	facevectors.Cov = make([]FaceVector, height*width)
+	//facevectors.Cov = make([]FaceVector, 0)
+	facevectors.Weight = FaceVector{Height: height, Width: width}
+	facevectors.Weight.Pixels = makeArray(height * width)
 	//facevectors.Eigen = make([]FaceVector, nbImage)
 	facevectors.Mean = FaceVector{Height: height, Width: width}
 	facevectors.Mean.Pixels = makeArray(height * width)
@@ -44,119 +48,122 @@ func (f *FaceVectors) Train() {
 	f.ComputeMean()
 	f.ComputeDifferenceMatrixPixels()
 	f.ComputeCovarianceMatrix()
-	//weightFace := f.ComputeWeights(f.Mean)
-	//f.ComputeEigenFaces()
+	//f.Weight = *f.ComputeWeights(f.Mean)
+	f.ComputeEigenFaces()
 }
 
 func (f *FaceVectors) ComputeMean() {
-	for k := 0; k < len(f.Pixels); k++ {
-		sum := 0.
-		for l := 0; l < (f.Width * f.Height); l++ {
-			sum += f.Pixels[k].Pixels[l]
+	for nbpixel := 0; nbpixel < (f.Width * f.Height); nbpixel++ {
+		for nbimages := 0; nbimages < len(f.Pixels); nbimages++ {
+			f.Mean.Pixels[nbpixel] += f.Pixels[nbimages].Pixels[nbpixel]
 		}
-		f.Mean.Pixels[k] = sum / float64(f.Width*f.Height)
+		f.Mean.Pixels[nbpixel] /= float64(len(f.Pixels))
 	}
 	return
 }
 
 func (f *FaceVectors) ComputeDifferenceMatrixPixels() {
 
-	for i := 0; i < len(f.Pixels); i++ {
-		f.Diff[i].Pixels = makeArray(f.Width * f.Height)
-		for j := 0; j < (f.Width * f.Height); j++ {
-			f.Diff[i].Pixels[j] = f.Pixels[i].Pixels[j] - f.Mean.Pixels[j]
+	for nbimages := 0; nbimages < len(f.Pixels); nbimages++ {
+		f.Diff[nbimages].Pixels = makeArray(f.Width * f.Height)
+		for nbpixels := 0; nbpixels < (f.Width * f.Height); nbpixels++ {
+			f.Diff[nbimages].Pixels[nbpixels] = f.Pixels[nbimages].Pixels[nbpixels] - f.Mean.Pixels[nbpixels]
 		}
 	}
 	return
 }
 
 func (f *FaceVectors) ComputeCovarianceMatrix() {
-	for i := 0; i < (f.Height * f.Width); i++ {
-		f.Cov[i].Pixels = makeArray(f.Width * f.Height)
-		for j := 0; j < (f.Height * f.Width); j++ {
+	f.Cov = make([][]float64,len(f.Diff))
+	for nbimages1 := 0; nbimages1 < len(f.Diff); nbimages1++ {
+		f.Cov[nbimages1] = make([]float64,len(f.Diff))
+		for nbimages2 := 0; nbimages2 < len(f.Diff); nbimages2++ {
 			sum := 0.0
-			for k := 0; k < len(f.Diff); k++ {
-				sum += f.Diff[k].Pixels[i] * f.Diff[k].Pixels[j]
+			for nbpixels := 0; nbpixels < len(f.Diff); nbpixels++ {
+				sum += f.Diff[nbimages1].Pixels[nbpixels] * f.Diff[nbimages2].Pixels[nbpixels]
 			}
-			f.Cov[i].Pixels[j] = sum
+			f.Cov[nbimages1][nbimages2] = sum
 		}
 	}
 	return
 }
 
-//
-//func (f *FaceVectors) ComputeEigenFaces() {
-//	cov := make([][]float64, len(f.Cov))
-//	for i := 0; i < len(f.Cov); i++ {
-//		cov[i] = make([]float64, len(f.Cov[i].Pixels))
-//		for j := 0; j < len(f.Cov[i].Pixels); j++ {
-//			cov[i][j] = f.Cov[i].Pixels[j]
-//		}
-//	}
-//
-//	//denseMatrix := gomat.MakeDenseMatrix(cov, len(f.Cov), len(f.Cov[0].Pixels))
-//	//eigenVectors, _, _, _ := denseMatrix.SVD()
-//	denseMat := gomat.MakeDenseMatrixStacked(cov)
-//	//fmt.Println(denseMat)
-//	eigenVectors, _, _ := denseMat.Eigen()
-//	//fmt.Println(eigenVectors)
-//	imageCount := eigenVectors.Cols()
-//	rank := eigenVectors.Rows()
-//
-//	for i := 0; i < rank; i++ {
-//		sumSquare := 0.0
-//		for j := 0; j < (f.Width * f.Height); j++ {
-//			for k := 0; k < imageCount; k++ {
-//
-//				f.Eigen[j].Pixels[i] += f.Diff[j].Pixels[k] * eigenVectors.Get(i, k)
-//			}
-//			sumSquare += f.Eigen[j].Pixels[i] * f.Eigen[j].Pixels[i]
-//		}
-//		norm := math.Sqrt(float64(sumSquare))
-//		for j := 0; j < len(f.Diff); j++ {
-//			f.Eigen[j].Pixels[i] /= norm
-//		}
-//	}
-//}
+func (f *FaceVectors) ComputeEigenFaces() {
 
-func (f *FaceVectors) ComputeWeights(diffImagePixels FaceVector) FaceVector {
-	eigenWeights := FaceVector{Height: f.Height, Width: f.Width}
-	eigenWeights.Pixels = makeArray(f.Width * f.Height)
-	for i := 0; i < len(f.Pixels); i++ {
-		for j := 0; j < (f.Width * f.Height); j++ {
-			eigenWeights.Pixels[i] += diffImagePixels.Pixels[j] * f.Pixels[i].Pixels[j]
-		}
+	denseMatrix := matrix.MakeDenseMatrixStacked(f.Cov)
+	eigenVectors, _, err := denseMatrix.Eigen()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 
-	return eigenWeights
+	//fmt.Println(eigenVectors)
+	imageCount := eigenVectors.Cols()
+	rank := eigenVectors.Rows()
+	f.Eigen = make([][]float64,(f.Height*f.Width))
+	for i:= 0; i < (f.Height*f.Width);i++ {
+		f.Eigen[i] = make([]float64,len(f.Diff))
+	}
 
+	for i := 0; i < rank; i++ {
+		sumSquare := 0.0
+		for j := 0; j < (f.Width * f.Height); j++ {
+			for k := 0; k < imageCount; k++ {
+				f.Eigen[j][i] += f.Diff[k].Pixels[j] * eigenVectors.Get(i, k)
+			}
+			sumSquare += f.Eigen[j][i] * f.Eigen[j][i]
+		}
+		norm := math.Sqrt(float64(sumSquare))
+		for j := 0; j < len(f.Diff); j++ {
+			f.Eigen[j][i] /= norm
+		}
+	}
+}
+
+func (f *FaceVectors) ComputeWeights(diffImagePixels FaceVector) *FaceVector {
+	weight := &FaceVector{Width: f.Width, Height: f.Height}
+	weight.Pixels = makeArray(len(f.Pixels))
+
+	for nbpixels := 0; nbpixels < (f.Width * f.Height); nbpixels++ {
+		for nbimages := 0; nbimages < len(f.Pixels); nbimages++ {
+
+			weight.Pixels[nbimages] += diffImagePixels.Pixels[nbpixels] * f.Eigen[nbpixels][nbimages]
+		}
+		//f.Weight.Pixels[nbpixels] /= float64(len(f.Pixels))
+	}
+	return weight
 }
 
 func (f *FaceVectors) ReconstructImageWithEigenFaces(weights FaceVector) FaceVector {
+	val := f.Width * f.Height
 	reconstructedPixels := FaceVector{Height: f.Height, Width: f.Width}
 	reconstructedPixels.Pixels = makeArray(f.Width * f.Height)
-	for i := 0; i < len(f.Pixels); i++ {
-		for j := 0; j < (f.Width * f.Height); j++ {
-			reconstructedPixels.Pixels[j] += weights.Pixels[j] * f.Pixels[i].Pixels[j]
+	for nbimages := 0; nbimages < len(f.Pixels); nbimages++ {
+		for nbpixels := 0; nbpixels < (f.Width * f.Height); nbpixels++ {
+			reconstructedPixels.Pixels[nbpixels] += weights.Pixels[nbimages] * f.Eigen[nbpixels][nbimages]
+			//fmt.Println(strconv.Itoa(nbpixels) + ":" + strconv.FormatFloat(reconstructedPixels.Pixels[nbpixels], 'f', 10, 64))
 		}
 	}
 
-	for i := 0; i < len(f.Mean.Pixels); i++ {
-		reconstructedPixels.Pixels[i] += f.Mean.Pixels[i]
+	for nbpixels := 0; nbpixels < val; nbpixels++ {
+		reconstructedPixels.Pixels[nbpixels] += f.Mean.Pixels[nbpixels]
 	}
 
 	min := float64(math.MaxFloat64)
 	max := float64(-math.MaxFloat64)
 
-	for i := 0; i < len(f.Mean.Pixels); i++ {
-		min = math.Min(min, reconstructedPixels.Pixels[i])
-		max = math.Max(max, reconstructedPixels.Pixels[i])
+	for nbpixels := 0; nbpixels < val; nbpixels++ {
+		min = math.Min(min, reconstructedPixels.Pixels[nbpixels])
+		max = math.Max(max, reconstructedPixels.Pixels[nbpixels])
 	}
-
+	//fmt.Println("Max:" + strconv.FormatFloat(max, 'f', 10, 64) + ",Min:" + strconv.FormatFloat(min, 'f', 10, 64))
 	normalizedReconstructedPixels := FaceVector{Height: f.Height, Width: f.Width}
 	normalizedReconstructedPixels.Pixels = makeArray(f.Width * f.Height)
-	for i := 0; i < len(reconstructedPixels.Pixels); i++ {
-		normalizedReconstructedPixels.Pixels[i] = (255.0 * (reconstructedPixels.Pixels[i] - min)) / (max - min)
+	for nbpixels := 0; nbpixels < val; nbpixels++ {
+		value := (255.0 * (reconstructedPixels.Pixels[nbpixels] - min)) / (max - min)
+		normalizedReconstructedPixels.Pixels[nbpixels] = value
+		//fmt.Println(value)
 	}
 
 	return normalizedReconstructedPixels
@@ -171,22 +178,22 @@ func (f *FaceVectors) ComputeDifferencePixels(subjectPixels FaceVector) FaceVect
 	return diffPixels
 }
 
-func (f *FaceVectors) ComputeDistance(subject FaceVector) float64 {
+func (f *FaceVectors) ComputeDistance(subject FaceVector) (FaceVector, float64) {
 	diffPixels := f.ComputeDifferencePixels(subject)
-	weights := f.ComputeWeights(diffPixels)
-	reconstructedEigenPixels := f.ReconstructImageWithEigenFaces(weights)
-	return f.ComputeImageDistance(subject, reconstructedEigenPixels)
+	weight := f.ComputeWeights(diffPixels)
+	reconstructedEigenPixels := f.ReconstructImageWithEigenFaces(*weight)
+
+	return reconstructedEigenPixels, f.ComputeImageDistance(subject, reconstructedEigenPixels)
 }
 
 func (f *FaceVectors) ComputeImageDistance(pixels1, pixels2 FaceVector) float64 {
-
 	distance := 0.0
 	for i := 0; i < (f.Width * f.Height); i++ {
 		diff := pixels1.Pixels[i] - pixels2.Pixels[i]
 		distance += diff * diff
 	}
 
-	return math.Sqrt(distance / float64(100))
+	return math.Sqrt(distance / float64(f.Width*f.Height))
 }
 func ComputeImageDistance(pixels1, pixels2 FaceVector) float64 {
 
@@ -260,14 +267,14 @@ func Normalize(faces []FaceVector) []FaceVector {
 //	return eigenvalues
 //}
 
-func matrix(faces []FaceVector) [][]float64 {
-	mat := make([][]float64, len(faces))
-	height := len(mat)
-	for i := 0; i < height; i++ {
-		mat[i] = faces[i].Pixels
-	}
-	return transpose(mat)
-}
+//func matrix(faces []FaceVector) [][]float64 {
+//	mat := make([][]float64, len(faces))
+//	height := len(mat)
+//	for i := 0; i < height; i++ {
+//		mat[i] = faces[i].Pixels
+//	}
+//	return transpose(mat)
+//}
 
 func transpose(mat [][]float64) (t [][]float64) {
 	height := len(mat)

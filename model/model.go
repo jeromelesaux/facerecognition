@@ -19,6 +19,14 @@ type User struct {
 	LastName  string `json:"last_name"`
 }
 
+func (u *User) ToString() string {
+	return "firstname :" + u.FirstName + " and lastname :" + u.LastName
+}
+
+func (u *User) Key() string {
+	return u.FirstName + "." + u.LastName
+}
+
 type UserFace struct {
 	User           User                   `json:"user"`
 	Faces          []eigenface.FaceVector `json:"eigenfaces"`
@@ -31,12 +39,57 @@ type UsersLib struct {
 	UsersFace map[string]*UserFace `json:"users_lib"`
 }
 
+type PersonVectors struct {
+	User        *User                  `json:"user"`
+	FaceVectors *eigenface.FaceVectors `json:"faces_vectors"`
+}
+
+type FacesVectors struct {
+	FacesVectors map[string]*PersonVectors `json:"personns_faces_vectors"`
+	Count        int                       `json:"faces_count"`
+}
+
 var (
 	DataPath        = "Data"
 	loadUserLibOnce sync.Once
 	userLibLock     sync.Mutex
 	usersLib        *UsersLib
+	facesVectors    *FacesVectors = NewFacesVectors()
 )
+
+func NewFacesVectors() *FacesVectors {
+	f := &FacesVectors{}
+	f.Count = 0
+	f.FacesVectors = make(map[string]*PersonVectors, 0)
+	return f
+}
+
+func (f *FacesVectors) AddUser(firstname string, lastname string, faces []eigenface.FaceVector) *PersonVectors {
+	user := &User{FirstName: firstname, LastName: lastname}
+	faceVectors := eigenface.NewFaceVectors(100, 100, len(faces))
+	faceVectors.Pixels = faces
+	person := &PersonVectors{User: user, FaceVectors: faceVectors}
+	f.FacesVectors[person.User.Key()] = person
+	return person
+}
+
+func (f *FacesVectors) DetectFaces(imagepath string) []eigenface.FaceVector {
+	faces := make([]eigenface.FaceVector, 0)
+	userBasePath := DataPath + string(filepath.Separator) + "tmp"
+	_, err := os.Stat(userBasePath)
+	if err != nil {
+		os.MkdirAll(userBasePath, os.ModePerm)
+	}
+
+	fd := facedetector.NewFaceDetector(imagepath)
+	filespaths := fd.DrawImageInDirectory(userBasePath)
+	for _, file := range filespaths {
+		faces = append(faces, ToVector(file))
+	}
+	fmt.Println("detected " + strconv.Itoa(len(faces)) + " faces.")
+	return faces
+
+}
 
 func GetUsersLib() *UsersLib {
 	loadUserLibOnce.Do(func() {
