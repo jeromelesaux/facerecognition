@@ -1,10 +1,10 @@
 package main
 
 import (
-	"path/filepath"
-	"fmt"
-	"strconv"
 	"facerecognition/model"
+	"fmt"
+	"path/filepath"
+	"strconv"
 )
 
 func main() {
