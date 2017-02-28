@@ -1,8 +1,8 @@
 package main
 
 import (
+	"facerecognition/logger"
 	"facerecognition/web"
-	"fmt"
 	"net/http"
 )
 
@@ -12,6 +12,6 @@ func main() {
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./static"))))
 	err := http.ListenAndServe(":8099", nil)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 	}
 }

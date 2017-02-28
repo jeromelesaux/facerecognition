@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"facedetection/facedetector"
 	"facerecognition/eigen"
-	"fmt"
+	"facerecognition/logger"
 	"image"
 	"image/png"
 	"math"
@@ -28,11 +28,11 @@ func (u *User) Key() string {
 }
 
 type UserFace struct {
-	User           User                   `json:"user"`
-	Faces          []eigenface.FaceVector `json:"eigenfaces"`
-	AverageFace    eigenface.FaceVector   `json:"average_face"`
-	TrainingImages []string               `json:"training_images"`
-	FacesDetected  []eigenface.FaceVector `json:"faces_detected"`
+	User           User        `json:"user"`
+	Faces          [][]float64 `json:"eigenfaces"`
+	AverageFace    []float64   `json:"average_face"`
+	TrainingImages []string    `json:"training_images"`
+	FacesDetected  [][]float64 `json:"faces_detected"`
 }
 
 type UsersLib struct {
@@ -64,7 +64,7 @@ func NewFacesVectors() *FacesVectors {
 	return f
 }
 
-func (f *FacesVectors) AddUser(firstname string, lastname string, faces []eigenface.FaceVector) *PersonVectors {
+func (f *FacesVectors) AddUser(firstname string, lastname string, faces [][]float64) *PersonVectors {
 	user := &User{FirstName: firstname, LastName: lastname}
 	faceVectors := eigenface.NewFaceVectors(100, 100, len(faces))
 	faceVectors.Pixels = faces
@@ -73,8 +73,8 @@ func (f *FacesVectors) AddUser(firstname string, lastname string, faces []eigenf
 	return person
 }
 
-func (f *FacesVectors) DetectFaces(imagepath string) []eigenface.FaceVector {
-	faces := make([]eigenface.FaceVector, 0)
+func (f *FacesVectors) DetectFaces(imagepath string) [][]float64 {
+	faces := make([][]float64, 0)
 	userBasePath := DataPath + string(filepath.Separator) + "tmp"
 	_, err := os.Stat(userBasePath)
 	if err != nil {
@@ -84,9 +84,10 @@ func (f *FacesVectors) DetectFaces(imagepath string) []eigenface.FaceVector {
 	fd := facedetector.NewFaceDetector(imagepath)
 	filespaths := fd.DrawImageInDirectory(userBasePath)
 	for _, file := range filespaths {
-		faces = append(faces, ToVector(file))
+		_, _, fv := ToVector(file)
+		faces = append(faces, fv)
 	}
-	fmt.Println("detected " + strconv.Itoa(len(faces)) + " faces.")
+	logger.Log("detected " + strconv.Itoa(len(faces)) + " faces.")
 	return faces
 
 }
@@ -108,13 +109,13 @@ func GetUsersLib() *UsersLib {
 func (ul *UsersLib) load() {
 	f, err := os.Open(DataPath + string(filepath.Separator) + "data_library.json")
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Log(err.Error())
 		return
 	}
 	defer f.Close()
 	err = json.NewDecoder(f).Decode(ul)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Log(err.Error())
 		return
 	}
 }
@@ -129,13 +130,13 @@ func (u *UsersLib) save() {
 	defer userLibLock.Unlock()
 	f, err := os.Create(DataPath + string(filepath.Separator) + "data_library.json")
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Log(err.Error())
 		return
 	}
 	defer f.Close()
 	err = json.NewEncoder(f).Encode(u)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Log(err.Error())
 		return
 	}
 }
@@ -172,30 +173,30 @@ func (u *UserFace) DetectFaces(images []string) {
 		filespaths := fd.DrawImageInDirectory(userBasePath)
 		u.TrainingImages = append(u.TrainingImages, filespaths...)
 	}
-	fmt.Println("Found " + strconv.Itoa(len(u.TrainingImages)) + " faces.")
+	logger.Log("Found " + strconv.Itoa(len(u.TrainingImages)) + " faces.")
 	return
 }
 
-func SumPixels(face eigenface.FaceVector) float64 {
+func SumPixels(face []float64, width int, height int) float64 {
 	sum := 0.
-	for i := 0; i < (face.Width * face.Height); i++ {
-		sum += face.Pixels[i]
+	for i := 0; i < (width * height); i++ {
+		sum += face[i]
 	}
 
-	return math.Abs(sum / float64(face.Width*face.Height) / 0xffff)
+	return math.Abs(sum / float64(width*height) / 0xffff)
 }
 
 func (u *UserFace) SaveAverageFace() {
 	img := ToImage(u.AverageFace)
 	out, err := os.Create(DataPath + string(filepath.Separator) + u.GetKey() + string(filepath.Separator) + "average.png")
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 		return
 	}
 
 	err = png.Encode(out, img)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 		return
 	}
 }
@@ -203,14 +204,14 @@ func (u *UserFace) SaveAverageFace() {
 func SaveImageTo(img *image.Gray16, path string) {
 	out, err := os.Create(path)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 		return
 	}
 	defer out.Close()
 
 	err = png.Encode(out, img)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 		return
 	}
 }
@@ -220,32 +221,36 @@ func (u *UserFace) SaveNormalizedFaces() {
 		img := ToImage(face)
 		out, err := os.Create(DataPath + string(filepath.Separator) + u.GetKey() + string(filepath.Separator) + strconv.Itoa(index) + "_normalized.png")
 		if err != nil {
-			fmt.Println(err)
+			logger.Log(err.Error())
 			return
 		}
 		defer out.Close()
 
 		err = png.Encode(out, img)
 		if err != nil {
-			fmt.Println(err)
+			logger.Log(err.Error())
 			return
 		}
 	}
 }
 
 func (u *UserFace) TrainFaces() {
+	var width int
+	var height int
 	if len(u.TrainingImages) == 0 {
 		return
 	}
 
-	faces := make([]eigenface.FaceVector, len(u.TrainingImages))
+	faces := make([][]float64, len(u.TrainingImages))
 	for index, imagePath := range u.TrainingImages {
-		faces[index] = ToVector(imagePath)
+		var f []float64
+		width, height, f = ToVector(imagePath)
+		faces[index] = f
 	}
 
 	u.FacesDetected = faces
-	u.Faces = eigenface.Normalize(faces)
-	u.AverageFace = eigenface.Average(faces)
+	u.Faces = eigenface.Normalize(faces, width, height)
+	u.AverageFace = eigenface.Average(faces, width, height)
 	u.SaveAverageFace()
 	u.SaveNormalizedFaces()
 
@@ -263,45 +268,45 @@ func (u *UsersLib) RecognizeFaceFromImage(image image.Image) *UserFace {
 	}
 	fd := facedetector.NewFaceDectectorFromImage(image)
 	filespaths := fd.DrawImageInDirectory("tmp")
-	facesDetected := make([]eigenface.FaceVector, 0)
+	facesDetected := make([][]float64, 0)
 	for _, file := range filespaths {
-		imageVector := ToVector(file)
-		if imageVector.Height > 0 && imageVector.Width > 0 {
+		width, height, imageVector := ToVector(file)
+		if height > 0 && width > 0 {
 			facesDetected = append(facesDetected, imageVector)
 		}
 		for key, person := range u.UsersFace {
-			fmt.Println("Compare with " + key)
-			if len(person.AverageFace.Pixels) == 0 {
+			logger.Log("Compare with " + key)
+			if len(person.AverageFace) == 0 {
 				continue
 			}
-			average := eigenface.Difference(person.AverageFace, imageVector)
-			sum := SumPixels(average)
+			average := eigenface.Difference(person.AverageFace, imageVector, width, height)
+			sum := SumPixels(average, width, height)
 
 			if sum < sumConserved && sum < 0.05 {
 				sumConserved = sum
 				faceFound = key
 				faceFoundVector = person
 			}
-			fmt.Println(key + " : " + strconv.FormatFloat(sum, 'f', 10, 64) + " with " + file)
+			logger.Log(key + " : " + strconv.FormatFloat(sum, 'f', 10, 64) + " with " + file)
 			//i := ToImage(average)
 			//SaveImageTo(i, "tmp/average"+key+".png")
 			//SaveImageTo(ToImage(person.AverageFace), "tmp/"+key+".png")
 		}
 	}
-	fmt.Println(faceFound + " seems to be the person you're looking for with value: " + strconv.FormatFloat(sumConserved, 'f', 10, 64))
+	logger.Log(faceFound + " seems to be the person you're looking for with value: " + strconv.FormatFloat(sumConserved, 'f', 10, 64))
 
 	faceFoundVector.FacesDetected = facesDetected
 	return faceFoundVector
 }
 
-func (u *UserFace) ComputeRecognizeDistance(face eigenface.FaceVector) float64 {
+func (u *UserFace) ComputeRecognizeDistance(face []float64) float64 {
 	distance := 0.
 	nbImages := len(u.Faces)
-	nbPixels := len(u.Faces[0].Pixels)
+	nbPixels := len(u.Faces[0])
 	for i := 0; i < nbPixels; i++ {
 		tmp := 0.
 		for j := 0; j < nbImages; j++ {
-			tmp += u.Faces[j].Pixels[i] - face.Pixels[i]
+			tmp += u.Faces[j][i] - face[i]
 		}
 		distance += math.Pow(tmp/float64(nbPixels), 2)
 	}
@@ -321,26 +326,26 @@ func (u *UsersLib) RecognizeFace(imagePath string) *UserFace {
 	fd := facedetector.NewFaceDetector(imagePath)
 	filespaths := fd.DrawImageInDirectory("tmp")
 	for _, file := range filespaths {
-		imageVector := ToVector(file)
+		width, height, imageVector := ToVector(file)
 		for key, person := range u.UsersFace {
-			if len(person.AverageFace.Pixels) == 0 {
+			if len(person.AverageFace) == 0 {
 				continue
 			}
-			average := eigenface.Difference(person.AverageFace, imageVector)
-			sum := SumPixels(average)
+			average := eigenface.Difference(person.AverageFace, imageVector, width, height)
+			sum := SumPixels(average, width, height)
 
 			if sum < sumConserved && sum < 0.05 {
 				sumConserved = sum
 				faceFound = key
 				faceFoundVector = person
 			}
-			fmt.Println(key + " : " + strconv.FormatFloat(sum, 'f', 10, 64) + " with " + file)
+			logger.Log(key + " : " + strconv.FormatFloat(sum, 'f', 10, 64) + " with " + file)
 			//i := ToImage(average)
 			//SaveImageTo(i, "tmp/average"+key+".png")
 			//SaveImageTo(ToImage(person.AverageFace), "tmp/"+key+".png")
 		}
 	}
-	fmt.Println(faceFound + " seems to be the person you're looking for with value: " + strconv.FormatFloat(sumConserved, 'f', 10, 64))
+	logger.Log(faceFound + " seems to be the person you're looking for with value: " + strconv.FormatFloat(sumConserved, 'f', 10, 64))
 	//f := facedetector.NewFaceDetector(imagePath)
 	//_, err := os.Stat("tmp")
 	//if err != nil {
@@ -357,19 +362,19 @@ func (u *UsersLib) RecognizeFace(imagePath string) *UserFace {
 	//for key, userFace := range u.UsersFace {
 	//
 	//	result := eigenface.Difference(userFace.AverageFace, averageFace)
-	//	fmt.Println(strconv.Itoa(result.Height) + ":" + strconv.Itoa(result.Width))
+	//	logger.Log(strconv.Itoa(result.Height) + ":" + strconv.Itoa(result.Width))
 	//	if result.Width == 0 && result.Height == 0 {
-	//		fmt.Println(imagePath + " contains " + key)
+	//		logger.Log(imagePath + " contains " + key)
 	//	}
 	//
 	//}
 	return faceFoundVector
 }
 func (u *UsersLib) CompareFace(facepath string) {
-	facevector := ToVector(facepath)
-	facesVector := make([]eigenface.FaceVector, 0)
+	width, height, facevector := ToVector(facepath)
+	facesVector := make([][]float64, 0)
 	facesVector = append(facesVector, facevector)
-	averageFace := eigenface.Average(facesVector)
+	averageFace := eigenface.Average(facesVector, width, height)
 	_, err := os.Stat("tmp")
 	if err != nil {
 		os.MkdirAll("tmp", os.ModePerm)
@@ -383,21 +388,21 @@ func (u *UsersLib) CompareFace(facepath string) {
 	//
 	//	distance := fvs.ComputeDistance(facevector)
 	//
-	//	fmt.Println(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//	logger.Log(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
 	//	//distance := eigenface.ComputeDistance(userFace.AverageFace.Pixels, averageFace.Pixels)
 	//	////distance := userFace.LevenshteinDistance(averageFace)
-	//	//fmt.Println(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//	//logger.Log(key + " Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
 	//	////faceVectorAv := eigenface.Average(faces)
-	//	////fmt.Println(key + " " + faceVectorAv.ToString())
+	//	////logger.Log(key + " " + faceVectorAv.ToString())
 	//	//diffVector := eigenface.Difference(userFace.AverageFace, averageFace)
 	//	//distance = eigenface.ComputeDistance(diffVector.Pixels, userFace.AverageFace.Pixels)
-	//	//fmt.Println(key + " diff Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
+	//	//logger.Log(key + " diff Distance : " + strconv.FormatFloat(distance, 'b', -1, 64))
 	//}
 }
 
-func (u *UserFace) LevenshteinDistance(face1 eigenface.FaceVector) float64 {
-	s1 := len(face1.Pixels)
-	s2 := len(u.AverageFace.Pixels)
+func (u *UserFace) LevenshteinDistance(face1 []float64) float64 {
+	s1 := len(face1)
+	s2 := len(u.AverageFace)
 	if s1 == 0 {
 		return 0
 	}
@@ -414,7 +419,7 @@ func (u *UserFace) LevenshteinDistance(face1 eigenface.FaceVector) float64 {
 		matrix2[0] = float64(i + 1)
 		for j := 0; j < s2-1; j++ {
 			cost := 1.
-			if face1.Pixels[i] == u.AverageFace.Pixels[j] {
+			if face1[i] == u.AverageFace[j] {
 				cost = 0.
 			}
 			matrix2[j+1] = MIN(matrix2[j]+1, matrix1[j+1]+1, matrix1[j]+cost)

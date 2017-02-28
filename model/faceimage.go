@@ -1,9 +1,10 @@
 package model
 
 import (
-	"facerecognition/eigen"
-	"fmt"
+	"facerecognition/algorithm"
+	"facerecognition/logger"
 	"github.com/disintegration/imaging"
+	_ "github.com/jbuchbinder/gopnm"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -15,15 +16,14 @@ var (
 	Width  = 100
 )
 
-func StreamToVector(img image.Image) eigenface.FaceVector {
+func StreamToVector(img image.Image) []float64 {
 	i := Resize(img)
 	width := i.Bounds().Max.X - i.Bounds().Min.X
 	height := i.Bounds().Max.Y - i.Bounds().Min.Y
 	minX := i.Bounds().Min.X
 	minY := i.Bounds().Min.Y
 
-	face := eigenface.FaceVector{Height: Height, Width: Width}
-	face.Pixels = make([]float64, face.Width*face.Height)
+	face := make([]float64, width*height)
 
 	// iterate through image row by row
 	for y := 0; y < height; y++ {
@@ -31,17 +31,17 @@ func StreamToVector(img image.Image) eigenface.FaceVector {
 			color := i.At(x-minX, y-minY)
 			// ORL database images are 16-bit grayscale, so can use any of RGB values
 			value, _, _, _ := color.RGBA()
-			face.Pixels[(y*width)+x] = float64(value)
+			face[y+x] = float64(value)
 		}
 	}
 	return face
 }
 
-func ToVector(path string) eigenface.FaceVector {
+func ToVector(path string) (int, int, []float64) {
 	f, err := os.Open(path)
 	if err != nil {
-		fmt.Println(err.Error())
-		return eigenface.FaceVector{}
+		logger.Log(err.Error())
+		return 0, 0, make([]float64, 0)
 	}
 	defer f.Close()
 	i, _, _ := image.Decode(f)
@@ -51,8 +51,7 @@ func ToVector(path string) eigenface.FaceVector {
 	minX := i.Bounds().Min.X
 	minY := i.Bounds().Min.Y
 
-	face := eigenface.FaceVector{Height: Height, Width: Width}
-	face.Pixels = make([]float64, face.Width*face.Height)
+	face := make([]float64, width*height)
 
 	// iterate through image row by row
 	for y := 0; y < height; y++ {
@@ -60,19 +59,19 @@ func ToVector(path string) eigenface.FaceVector {
 			color := i.At(x-minX, y-minY)
 			// ORL database images are 16-bit grayscale, so can use any of RGB values
 			value, _, _, _ := color.RGBA()
-			face.Pixels[(y*width)+x] = float64(value)
+			face[y+x] = float64(value)
 		}
 	}
-	return face
+	return width, height, face
 }
 
-func ToImage(face eigenface.FaceVector) *image.Gray16 {
+func ToImage(face []float64) *image.Gray16 {
 	bounds := image.Rect(0, 0, Width, Height)
 	im := image.NewGray16(bounds)
 	for y := 0; y < Height; y++ {
 		for x := 0; x < Width; x++ {
 			// ORL database images are 16-bit grayscale
-			value := uint16(face.Pixels[(y*Width)+x])
+			value := uint16(face[y+x])
 			im.SetGray16(x, y, color.Gray16{value})
 		}
 	}
@@ -81,4 +80,14 @@ func ToImage(face eigenface.FaceVector) *image.Gray16 {
 
 func Resize(img image.Image) *image.NRGBA {
 	return imaging.Resize(img, Width, Height, imaging.Lanczos)
+}
+
+func ToMatrix(width, height int, face []float64) *algorithm.Matrix {
+	m := algorithm.NewMatrix(height, width)
+	for row := 0; row < height; row++ {
+		for col := 0; col < width; col++ {
+			m.A[row][col] = face[row+col]
+		}
+	}
+	return m
 }

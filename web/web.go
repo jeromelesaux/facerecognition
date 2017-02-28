@@ -5,9 +5,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"facerecognition/eigen"
+	"facerecognition/logger"
 	"facerecognition/model"
-	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -53,7 +52,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 		}
 		if name := part.FormName(); name != "" {
 
-			fmt.Println(part.FileName())
+			logger.Log(part.FileName())
 			img, err := imageFromMultipart(part)
 			if err == nil {
 				faceFound := userslib.RecognizeFaceFromImage(img)
@@ -115,7 +114,7 @@ func Training(w http.ResponseWriter, r *http.Request) {
 				user.LastName = stringFromMultipart(part)
 				continue
 			default:
-				fmt.Println(part.FileName())
+				logger.Log(part.FileName())
 				img, err := imageFromMultipart(part)
 				if err == nil {
 					images = append(images, img)
@@ -125,7 +124,7 @@ func Training(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-	fmt.Println(user)
+	logger.Log(user.Key())
 	if user.FirstName == "" || user.LastName == "" {
 		response.Error = "Firstname and lastname are mandatories."
 	}
@@ -151,16 +150,16 @@ func sendJson(w http.ResponseWriter, i interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(i)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 	}
 }
 
-func faceVectorToBase64(f eigenface.FaceVector) string {
+func faceVectorToBase64(f []float64) string {
 	img := model.ToImage(f)
 	buf := new(bytes.Buffer)
 	err := png.Encode(buf, img)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 	}
 	return base64.StdEncoding.EncodeToString(buf.Bytes())
 }
@@ -169,7 +168,7 @@ func imageFromMultipart(p *multipart.Part) (image.Image, error) {
 	buf := bufio.NewReader(p)
 	image, _, err := image.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Log(err.Error())
 	}
 	return image, err
 }
