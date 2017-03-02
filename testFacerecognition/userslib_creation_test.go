@@ -1,4 +1,4 @@
-package test_facerecognition
+package testFacerecognition
 
 import (
 	"facerecognition/logger"

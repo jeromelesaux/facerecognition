@@ -3,6 +3,7 @@ package algorithm
 import (
 	"facerecognition/logger"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 /**
@@ -58,11 +59,10 @@ func NewMatrix(m, n int) *Matrix {
 		M: m,
 		N: n,
 	}
-	a := make([][]float64, m)
+	mat.A = make([][]float64, m)
 	for i := 0; i < m; i++ {
-		a[i] = make([]float64, n)
+		mat.A[i] = make([]float64, n)
 	}
-	mat.A = a
 	return mat
 }
 
@@ -95,7 +95,7 @@ func NewMatrixWithMatrix(a [][]float64, m, n int) (*Matrix, error) {
 }
 
 func (m *Matrix) Transpose() *Matrix {
-	x := NewMatrix(m.M, m.N)
+	x := NewMatrix(m.N, m.M)
 	for i := 0; i < m.M; i++ {
 		for j := 0; j < m.N; j++ {
 			x.A[j][i] = m.A[i][j]
@@ -133,8 +133,12 @@ func (m *Matrix) Minus(b *Matrix) *Matrix {
 	return x
 }
 
+func (m *Matrix) Tostring() string {
+	return "M,N:" + strconv.Itoa(m.M) + " " + strconv.Itoa(m.N)
+}
+
 func (m *Matrix) TimesMatrix(b *Matrix) *Matrix {
-	if b.M != b.N {
+	if b.M != m.N {
 		logger.Log("Matrix inner dimensions must agree")
 		return &Matrix{}
 	}
@@ -175,20 +179,20 @@ func (m *Matrix) ColumnsDimension() int {
 }
 
 func (m *Matrix) GetMatrix(r []int, j0, j1 int) *Matrix {
-	x := NewMatrix(len(r), j1-j0+1)
+	x := NewMatrix(len(r), j1 - j0 + 1)
 	for i := 0; i < len(r); i++ {
 		for j := j0; j <= j1; j++ {
-			x.A[i][j-j0] = m.A[r[i]][j]
+			x.A[i][j - j0] = m.A[r[i]][j]
 		}
 	}
 	return x
 }
 
 func (m *Matrix) GetMatrix2(i0, i1 int, c []int) *Matrix {
-	x := NewMatrix(i1-i0+1, len(c))
+	x := NewMatrix(i1 - i0 + 1, len(c))
 	for i := i0; i <= i1; i++ {
 		for j := 0; j < len(c); j++ {
-			x.A[i-i0][j] = m.A[i][c[j]]
+			x.A[i - i0][j] = m.A[i][c[j]]
 		}
 	}
 	return x
@@ -197,16 +201,16 @@ func (m *Matrix) GetMatrix2(i0, i1 int, c []int) *Matrix {
 func (m *Matrix) SetMatrix(i0, i1, j0, j1 int, x *Matrix) {
 	for i := i0; i <= i1; i++ {
 		for j := j0; j <= j1; j++ {
-			m.A[i][j] = x.A[i-i0][j-j0]
+			m.A[i][j] = x.A[i - i0][j - j0]
 		}
 	}
 }
 
 func (m *Matrix) GetMatrix3(i0, i1, j0, j1 int) *Matrix {
-	x := NewMatrix(i1-i0+1, j1-j0+1)
+	x := NewMatrix(i1 - i0 + 1, j1 - j0 + 1)
 	for i := i0; i <= i1; i++ {
 		for j := j0; j <= j1; j++ {
-			x.A[i-i0][j-j0] = m.A[i][j]
+			x.A[i - i0][j - j0] = m.A[i][j]
 		}
 	}
 	return x
@@ -240,4 +244,18 @@ func (mat *Matrix) Identity(m, n int) *Matrix {
 		}
 	}
 	return a
+}
+
+func (mat *Matrix) Vectorize() *Matrix {
+
+	m := mat.RowsDimension()
+	n := mat.ColumnsDimension()
+	result := NewMatrix(m * n, 1)
+	for p := 0; p < n; p++ {
+		for q := 0; q < m; q++ {
+			result.A[p * m + q][0] = mat.A[q][p]
+		}
+	}
+	
+	return result
 }

@@ -1,13 +1,14 @@
-package test_facerecognition
+package testFacerecognition
 
 import (
 	"facerecognition/logger"
 	"facerecognition/model"
 	"path/filepath"
 	"strconv"
+	"testing"
 )
 
-func main() {
+func TestVector(t *testing.T) {
 	facesvectors := model.NewFacesVectors()
 	faces := facesvectors.DetectFaces("/home/jlesaux/workspace/go_dev/src/facerecognition/test/images/trainingset-barrack.png")
 	person := facesvectors.AddUser("Barrack", "Obama", faces)
