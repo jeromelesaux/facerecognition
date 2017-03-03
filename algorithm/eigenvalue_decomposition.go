@@ -3,8 +3,6 @@ package algorithm
 import (
 	"math"
 
-	"facerecognition/logger"
-	"strconv"
 )
 
 type EigenvalueDecomposition struct {
@@ -26,7 +24,7 @@ var (
 //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
 //  Fortran subroutine in EISPACK.
 func (e *EigenvalueDecomposition) Tred2() {
-	logger.Log("starting tred2")
+	//logger.Log("starting tred2")
 	for j := 0; j < e.N; j++ {
 		e.D[j] = e.V[e.N - 1][j]
 	}
@@ -133,16 +131,16 @@ func (e *EigenvalueDecomposition) Tred2() {
 		e.D[j] = e.V[e.N - 1][j]
 		e.V[e.N - 1][j] = 0.0
 	}
-	logger.Log("dimensions of e.V :" + strconv.Itoa(len(e.V)))
+	//logger.Log("dimensions of e.V :" + strconv.Itoa(len(e.V)))
 	e.V[e.N - 1][e.N - 1] = 1.0
 	e.E[0] = 0.0
-	logger.Log("tred2 ended")
+	//logger.Log("tred2 ended")
 }
 
 // Symmetric tridiagonal QL algorithm.
 
 func (e *EigenvalueDecomposition) Tql2() {
-	logger.Log("starting tql2")
+	//logger.Log("starting tql2")
 	//  This is derived from the Algol procedures tql2, by
 	//  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
 	//  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
@@ -274,12 +272,12 @@ func (e *EigenvalueDecomposition) Tql2() {
 		}
 	}
 
-	logger.Log("tql2 ended")
+	//logger.Log("tql2 ended")
 }
 
 // Nonsymmetric reduction to Hessenberg form.
 func (e *EigenvalueDecomposition) Orthes() {
-	logger.Log("others starting")
+	//logger.Log("others starting")
 	//  This is derived from the Algol procedures orthes and ortran,
 	//  by Martin and Wilkinson, Handbook for Auto. Comp.,
 	//  Vol.ii-Linear Algebra, and the corresponding
@@ -366,7 +364,7 @@ func (e *EigenvalueDecomposition) Orthes() {
 			}
 		}
 	}
-	logger.Log("others ended")
+	//logger.Log("others ended")
 }
 
 func (e *EigenvalueDecomposition) Cdiv(xr, xi, yr, yi float64) {

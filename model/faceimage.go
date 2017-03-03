@@ -10,7 +10,6 @@ import (
 	"os"
 	"strings"
 	"bufio"
-	"fmt"
 	"strconv"
 )
 
@@ -114,7 +113,7 @@ func ToMatrix(path string) *algorithm.Matrix {
 		s := strings.Split(dimensions, " ")
 		width,_ := strconv.Atoi(s[0])
 		height,_ := strconv.Atoi(s[1])
-		fmt.Printf("%d %d", width, height)
+		//fmt.Printf("%d %d", width, height)
 		mat := algorithm.NewMatrix(height, width)
 		bf.ReadLine()
 		for row := 0; row < height; row++ {

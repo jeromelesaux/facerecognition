@@ -32,22 +32,25 @@ func (t *Trainer) Add(m *algorithm.Matrix, label string) {
 func (t *Trainer) Train() {
 	switch t.FeatureType {
 	case "PCA":
-		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.K)
+		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = p.FeatureExtraction
 		break
 	case "LDA":
-		l := NewLDA(t.TrainingSet, t.TrainingLabels, t.K)
+		l := NewLDA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
 		break
 	case "LPP":
-		l := NewLPP(t.TrainingSet, t.TrainingLabels, t.K)
+		l := NewLPP(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
 	}
 
 	t.Model = t.FeatureExtraction.ProjectedTrainingSet
 }
 func (t *Trainer) Recognize(matrix *algorithm.Matrix) string {
-	testCase := t.FeatureExtraction.W.Transpose().TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
+	m := t.FeatureExtraction.W
+	m2 := m.Transpose()
+	testCase := m2.TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
+	//testCase := t.FeatureExtraction.W.Transpose().TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
 	result := AssignLabel(t.Model, testCase, t.K, t.Metric)
 	return result
 }
