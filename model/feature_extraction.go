@@ -17,9 +17,9 @@ type FeatureExtraction struct {
 
 func NewFeatureExtraction() *FeatureExtraction {
 	return &FeatureExtraction{
-		NumOfComponents:0,
+		NumOfComponents: 0,
 		//TrainingSet:make([]*algorithm.Matrix,0),
-		Labels:make([]string,0),
+		Labels: make([]string, 0),
 		//ProjectedTrainingSet:make([]*ProjectedTrainingMatrix,0),
 	}
 
@@ -48,20 +48,20 @@ func (m *MixArray) Len() int {
 	return len(m.Mixes)
 }
 
-func (m *MixArray)Tostring() string {
-	str :=""
-	for _,value := range m.Mixes {
-		str += strconv.FormatFloat(value.Value,'f',16,32) + " "
+func (m *MixArray) Tostring() string {
+	str := ""
+	for _, value := range m.Mixes {
+		str += strconv.FormatFloat(value.Value, 'f', 16, 32) + " "
 	}
 	return str
 }
 
 func (m *MixArray) Less(i, j int) bool {
-	return  m.Mixes[i].Value > m.Mixes[j].Value
+	return m.Mixes[i].Value > m.Mixes[j].Value
 }
 
 func (m *MixArray) Swap(i, j int) {
-	m.Mixes[i],m.Mixes[j] = m.Mixes[j],m.Mixes[i]
+	m.Mixes[i], m.Mixes[j] = m.Mixes[j], m.Mixes[i]
 }
 
 func GetIndexesOfKEigenvalues(d []float64, k int) []int {

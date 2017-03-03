@@ -24,6 +24,15 @@ func NewTrainer() *Trainer {
 	return t
 }
 
+func NewTrainerArgs(featureType string, k int, numOfComponents int, distanceFunction func(a, b *algorithm.Matrix) float64) *Trainer {
+	t := NewTrainer()
+	t.FeatureType = featureType
+	t.K = k
+	t.NumOfComponents = numOfComponents
+	t.Metric = distanceFunction
+	return t
+}
+
 func (t *Trainer) Add(m *algorithm.Matrix, label string) {
 	t.TrainingSet = append(t.TrainingSet, m)
 	t.TrainingLabels = append(t.TrainingLabels, label)

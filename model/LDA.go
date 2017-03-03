@@ -81,7 +81,7 @@ func NewLDA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	l.FeatureExtraction.ProjectedTrainingSet = make([]*ProjectedTrainingMatrix, 0)
 	for i := 0; i < len(trainingSet); i++ {
 		ptm := NewProjectedTrainingMatrix(l.FeatureExtraction.W.Transpose().TimesMatrix(trainingSet[i].Minus(pca.FeatureExtraction.MeanMatrix)), labels[i])
-		l.FeatureExtraction.ProjectedTrainingSet =append(l.FeatureExtraction.ProjectedTrainingSet, ptm)
+		l.FeatureExtraction.ProjectedTrainingSet = append(l.FeatureExtraction.ProjectedTrainingSet, ptm)
 	}
 	l.FeatureExtraction.MeanMatrix = pca.FeatureExtraction.MeanMatrix
 	return l

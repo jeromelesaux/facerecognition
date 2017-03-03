@@ -11,7 +11,7 @@ type LPP struct {
 }
 
 func NewLPP(trainingSet []*algorithm.Matrix, labels []string, numOfComponents int) *LPP {
-	lpp := &LPP{FeatureExtraction:NewFeatureExtraction()}
+	lpp := &LPP{FeatureExtraction: NewFeatureExtraction()}
 	//n := len(trainingSet)
 	tempSet := make(map[string]int)
 	for i := 0; i < len(labels); i++ {

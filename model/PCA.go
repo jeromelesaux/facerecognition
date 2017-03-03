@@ -11,7 +11,7 @@ type PCA struct {
 }
 
 func NewPCA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents int) *PCA {
-	p := &PCA{FeatureExtraction:NewFeatureExtraction()}
+	p := &PCA{FeatureExtraction: NewFeatureExtraction()}
 	p.FeatureExtraction.TrainingSet = trainingSet
 	p.FeatureExtraction.Labels = labels
 	p.FeatureExtraction.NumOfComponents = numOfComponents
@@ -21,7 +21,7 @@ func NewPCA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	p.FeatureExtraction.ProjectedTrainingSet = make([]*ProjectedTrainingMatrix, 0)
 	for i := 0; i < len(trainingSet); i++ {
 		ptm := NewProjectedTrainingMatrix(p.FeatureExtraction.W.Transpose().TimesMatrix(trainingSet[i].Minus(p.FeatureExtraction.MeanMatrix)), labels[i])
-		p.FeatureExtraction.ProjectedTrainingSet = append(p.FeatureExtraction.ProjectedTrainingSet,ptm)
+		p.FeatureExtraction.ProjectedTrainingSet = append(p.FeatureExtraction.ProjectedTrainingSet, ptm)
 	}
 	return p
 }
@@ -43,7 +43,7 @@ func (p *PCA) GetFeature(input []*algorithm.Matrix, k int) *algorithm.Matrix {
 	x := algorithm.NewMatrix(row, column)
 	// get eigenvalues and eigenvectors
 	for i := 0; i < column; i++ {
-		x.SetMatrix(0, row -1, i, i, input[i].Minus(p.FeatureExtraction.MeanMatrix))
+		x.SetMatrix(0, row-1, i, i, input[i].Minus(p.FeatureExtraction.MeanMatrix))
 	}
 
 	xt := x.Transpose()

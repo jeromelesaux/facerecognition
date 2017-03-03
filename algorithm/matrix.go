@@ -179,20 +179,20 @@ func (m *Matrix) ColumnsDimension() int {
 }
 
 func (m *Matrix) GetMatrix(r []int, j0, j1 int) *Matrix {
-	x := NewMatrix(len(r), j1 - j0 + 1)
+	x := NewMatrix(len(r), j1-j0+1)
 	for i := 0; i < len(r); i++ {
 		for j := j0; j <= j1; j++ {
-			x.A[i][j - j0] = m.A[r[i]][j]
+			x.A[i][j-j0] = m.A[r[i]][j]
 		}
 	}
 	return x
 }
 
 func (m *Matrix) GetMatrix2(i0, i1 int, c []int) *Matrix {
-	x := NewMatrix(i1 - i0 + 1, len(c))
+	x := NewMatrix(i1-i0+1, len(c))
 	for i := i0; i <= i1; i++ {
 		for j := 0; j < len(c); j++ {
-			x.A[i - i0][j] = m.A[i][c[j]]
+			x.A[i-i0][j] = m.A[i][c[j]]
 		}
 	}
 	return x
@@ -201,16 +201,16 @@ func (m *Matrix) GetMatrix2(i0, i1 int, c []int) *Matrix {
 func (m *Matrix) SetMatrix(i0, i1, j0, j1 int, x *Matrix) {
 	for i := i0; i <= i1; i++ {
 		for j := j0; j <= j1; j++ {
-			m.A[i][j] = x.A[i - i0][j - j0]
+			m.A[i][j] = x.A[i-i0][j-j0]
 		}
 	}
 }
 
 func (m *Matrix) GetMatrix3(i0, i1, j0, j1 int) *Matrix {
-	x := NewMatrix(i1 - i0 + 1, j1 - j0 + 1)
+	x := NewMatrix(i1-i0+1, j1-j0+1)
 	for i := i0; i <= i1; i++ {
 		for j := j0; j <= j1; j++ {
-			x.A[i - i0][j - j0] = m.A[i][j]
+			x.A[i-i0][j-j0] = m.A[i][j]
 		}
 	}
 	return x
@@ -250,12 +250,12 @@ func (mat *Matrix) Vectorize() *Matrix {
 
 	m := mat.RowsDimension()
 	n := mat.ColumnsDimension()
-	result := NewMatrix(m * n, 1)
+	result := NewMatrix(m*n, 1)
 	for p := 0; p < n; p++ {
 		for q := 0; q < m; q++ {
-			result.A[p * m + q][0] = mat.A[q][p]
+			result.A[p*m+q][0] = mat.A[q][p]
 		}
 	}
-	
+
 	return result
 }

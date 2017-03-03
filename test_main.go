@@ -39,5 +39,3 @@ func main() {
 	personFound2 := trainer.Recognize(mat2.Vectorize())
 	logger.Log("found :" + personFound2)
 }
-
-
