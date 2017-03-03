@@ -3,6 +3,7 @@ package model
 import (
 	"facerecognition/algorithm"
 	"sort"
+	"strconv"
 )
 
 type FeatureExtraction struct {
@@ -29,17 +30,17 @@ type mix struct {
 	Value float64
 }
 
-func NewMix(i int, v float64) mix {
-	return mix{Index: i, Value: v}
+func NewMix(i int, v float64) *mix {
+	return &mix{Index: i, Value: v}
 }
 
 type MixArray struct {
-	Mixes []mix
+	Mixes []*mix
 }
 
 func NewMixArrays(n int) *MixArray {
 	m := &MixArray{}
-	m.Mixes = make([]mix, n)
+	m.Mixes = make([]*mix, n)
 	return m
 }
 
@@ -47,18 +48,20 @@ func (m *MixArray) Len() int {
 	return len(m.Mixes)
 }
 
-func (m *MixArray) Less(i, j int) bool {
-	if m.Mixes[i].Value < m.Mixes[j].Value {
-		return true
-	} else {
-		return false
+func (m *MixArray)Tostring() string {
+	str :=""
+	for _,value := range m.Mixes {
+		str += strconv.FormatFloat(value.Value,'f',16,32) + " "
 	}
+	return str
+}
+
+func (m *MixArray) Less(i, j int) bool {
+	return  m.Mixes[i].Value > m.Mixes[j].Value
 }
 
 func (m *MixArray) Swap(i, j int) {
-	temp := m.Mixes[i]
-	m.Mixes[i] = m.Mixes[j]
-	m.Mixes[j] = temp
+	m.Mixes[i],m.Mixes[j] = m.Mixes[j],m.Mixes[i]
 }
 
 func GetIndexesOfKEigenvalues(d []float64, k int) []int {
@@ -66,6 +69,7 @@ func GetIndexesOfKEigenvalues(d []float64, k int) []int {
 	for i := 0; i < len(d); i++ {
 		mixes.Mixes[i] = NewMix(i, d[i])
 	}
+
 	sort.Sort(mixes)
 
 	result := make([]int, k)
