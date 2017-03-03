@@ -5,7 +5,6 @@ import (
 
 	"facerecognition/logger"
 	"strconv"
-	"fmt"
 )
 
 type EigenvalueDecomposition struct {
@@ -150,6 +149,7 @@ func (e *EigenvalueDecomposition) Tql2() {
 	//  Fortran subroutine in EISPACK.
 
 	for i := 1; i < e.N; i++ {
+		//fmt.Printf("i:%d,e[i-1]:%f,e[i]:%f\n",i,e.E[i-1],e.E[i])
 		e.E[i - 1] = e.E[i]
 	}
 	e.E[e.N - 1] = 0.0
@@ -163,6 +163,7 @@ func (e *EigenvalueDecomposition) Tql2() {
 
 		tst1 = math.Max(tst1, math.Abs(e.D[l]) + math.Abs(e.E[l]))
 		m := l
+
 		for m < e.N {
 			if math.Abs(e.E[m]) <= eps * tst1 {
 				break
@@ -172,21 +173,21 @@ func (e *EigenvalueDecomposition) Tql2() {
 
 		// If m == l, e.D[l] is an eigenvalue,
 		// otherwise, iterate.
-
 		if m > l {
 			iter := 0
 			for {
 				// Check for convergence.
-				if math.Abs(e.E[l]) <= (eps * tst1) {
-					break
+				//if math.Abs(e.E[l]) <= (eps * tst1) {
+				//	break
+				//
+				//}
 
-				}
-				
 				iter = iter + 1 // (Could check iteration count here.)
 
 				// Compute implicit shift
 
 				g := e.D[l]
+
 				p := (e.D[l + 1] - g) / (2.0 * e.E[l])
 				r := math.Hypot(p, 1.0)
 				if p < 0 {
@@ -196,6 +197,7 @@ func (e *EigenvalueDecomposition) Tql2() {
 				e.D[l + 1] = e.E[l] * (p + r)
 				dl1 := e.D[l + 1]
 				h := g - e.D[l]
+
 				for i := l + 2; i < e.N; i++ {
 					e.D[i] -= h
 				}
@@ -205,8 +207,8 @@ func (e *EigenvalueDecomposition) Tql2() {
 
 				p = e.D[m]
 				c := 1.0
-				c2 := c
-				c3 := c
+				c2 := 1.0
+				c3 := 1.0
 				el1 := e.E[l + 1]
 				s := 0.0
 				s2 := 0.0
@@ -217,11 +219,14 @@ func (e *EigenvalueDecomposition) Tql2() {
 					g = c * e.E[i]
 					h = c * p
 					r = math.Hypot(p, e.E[i])
+
 					e.E[i + 1] = s * r
+
 					s = e.E[i] / r
+
 					c = p / r
 					p = c * e.D[i] - s * g
-					e.D[i + 1] = h + s * (c * g + s * e.D[i])
+					e.D[i + 1] = h + s * ( c * g + s * e.D[i])
 					// Accumulate transformation.
 
 					for k := 0; k < e.N; k++ {
@@ -234,38 +239,41 @@ func (e *EigenvalueDecomposition) Tql2() {
 				e.E[l] = s * p
 				e.D[l] = c * p
 
-				fmt.Println(l)
-				fmt.Println(math.Abs(e.E[l]))
-				fmt.Println(tst1)
-				fmt.Println("-------")
+
+				// Check for convergence.
+				if math.Abs(e.E[l]) <= (eps * tst1) {
+					break
+
+				}
 
 			}
-			e.D[l] = e.D[l] + f
-			e.E[l] = 0.0
 		}
+		e.D[l] += f
+		e.E[l] = 0.0
+
 
 		// Sort eigenvalues and corresponding vectors.
-
-		for i := 0; i < e.N - 1; i++ {
-			k := i
-			p := e.D[i]
-			for j := i + 1; j < e.N; j++ {
-				if e.D[j] < p {
-					k = j
-					p = e.D[j]
-				}
+	}
+	for i := 0; i < e.N - 1; i++ {
+		k := i
+		p := e.D[i]
+		for j := i + 1; j < e.N; j++ {
+			if e.D[j] < p {
+				k = j
+				p = e.D[j]
 			}
-			if k != i {
-				e.D[k] = e.D[i]
-				e.D[i] = p
-				for j := 0; j < e.N; j++ {
-					p = e.V[j][i]
-					e.V[j][i] = e.V[j][k]
-					e.V[j][k] = p
-				}
+		}
+		if k != i {
+			e.D[k] = e.D[i]
+			e.D[i] = p
+			for j := 0; j < e.N; j++ {
+				pt := e.V[j][i]
+				e.V[j][i] = e.V[j][k]
+				e.V[j][k] = pt
 			}
 		}
 	}
+
 	logger.Log("tql2 ended")
 }
 
@@ -788,7 +796,7 @@ func (e *EigenvalueDecomposition) Hqr2() {
 */
 
 func NewEigenvalueDecomposition(matrix *Matrix) *EigenvalueDecomposition {
-	logger.Log(matrix.Tostring())
+	//logger.Log(matrix.Tostring())
 	e := &EigenvalueDecomposition{}
 	A := matrix.A
 	e.N = matrix.ColumnsDimension()
