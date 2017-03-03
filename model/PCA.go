@@ -65,8 +65,8 @@ func (p *PCA) GetFeature(input []*algorithm.Matrix, k int) *algorithm.Matrix {
 		temp := 0.0
 		for j := 0; j < row; j++ {
 			temp += math.Pow(selectedEigenVectors.A[j][i], 2)
-			temp = math.Sqrt(temp)
 		}
+		temp = math.Sqrt(temp)
 		for j := 0; j < row; j++ {
 			selectedEigenVectors.A[j][i] /= temp
 		}

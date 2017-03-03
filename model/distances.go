@@ -29,7 +29,7 @@ func (c *CosineDissimilarity) GetDistance(a, b *algorithm.Matrix) float64 {
 	// get e norm
 	eNorm := 0.
 	for i := 0; i < size; i++ {
-		sNorm += math.Pow(b.A[i][0], 2)
+		eNorm += math.Pow(b.A[i][0], 2)
 	}
 	eNorm = math.Sqrt(eNorm)
 	if se < 0 {
