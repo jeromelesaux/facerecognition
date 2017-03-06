@@ -18,9 +18,7 @@ type FeatureExtraction struct {
 func NewFeatureExtraction() *FeatureExtraction {
 	return &FeatureExtraction{
 		NumOfComponents: 0,
-		//TrainingSet:make([]*algorithm.Matrix,0),
-		Labels: make([]string, 0),
-		//ProjectedTrainingSet:make([]*ProjectedTrainingMatrix,0),
+		Labels:          make([]string, 0),
 	}
 
 }

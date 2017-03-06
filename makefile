@@ -38,6 +38,7 @@ deps: init
 		@echo "    Download packages"
 		@$(foreach element,$(PACKAGES),go get -d -v $(element);)
 
+
 organize: deps
 		@echo "    Go FMT"
 		@$(foreach element,$(SOURCES),go fmt $(element);)

@@ -8,7 +8,8 @@ import (
 )
 
 func TestS1Trainer(t *testing.T) {
-	trainer := model.NewTrainerArgs("PCA", 1, 3, &model.CosineDissimilarity{}.GetDistance)
+	m := &model.CosineDissimilarity{}
+	trainer := model.NewTrainerArgs("PCA", 1, 3, m.GetDistance)
 	//trainer.FeatureType = "PCA"
 	//trainer.K = 1
 	//trainer.NumOfComponents = 3
@@ -35,9 +36,14 @@ func TestS1Trainer(t *testing.T) {
 	mat := model.ToMatrix("faces/s2/4.pgm")
 	personFound1 := trainer.Recognize(mat.Vectorize())
 	logger.Log("found :" + personFound1)
-
+	if "john" != personFound1 {
+		t.Fatal("Expected john and " + personFound1 + " found")
+	}
 	mat2 := model.ToMatrix("faces/s4/4.pgm")
 	personFound2 := trainer.Recognize(mat2.Vectorize())
 	logger.Log("found :" + personFound2)
+	if "smith" != personFound2 {
+		t.Fatal("Expected john and " + personFound2 + " found")
+	}
 
 }

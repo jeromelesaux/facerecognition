@@ -1,10 +1,10 @@
 package testFacerecognition
 
 import (
-	"facerecognition/logger"
+	"facedetection/facedetector"
 	"facerecognition/model"
 	_ "image/png"
-	"path/filepath"
+	"os"
 	"strconv"
 	"testing"
 )
@@ -89,15 +89,14 @@ func TestDetectGeorge(t *testing.T) {
 //}
 
 func TestDetectAndTrainBarrack(t *testing.T) {
-	facesvectors := model.NewFacesVectors()
-	faces := facesvectors.DetectFaces("images/trainingset-barrack.png")
-	person := facesvectors.AddUser("Barrack", "Obama", faces)
-	person.FaceVectors.Train()
-	img := model.ToImage(person.FaceVectors.Mean)
-	model.SaveImageTo(img, model.DataPath+string(filepath.Separator)+"tmp"+string(filepath.Separator)+person.User.Key()+"-average.png")
-	face := facesvectors.DetectFaces("images/barack.png")
-	reconstructed, distance := person.FaceVectors.ComputeDistance(face[0])
-	img = model.ToImage(reconstructed)
-	model.SaveImageTo(img, model.DataPath+string(filepath.Separator)+"tmp"+string(filepath.Separator)+person.User.Key()+"-reconstructed.png")
-	logger.Log("Barrack training distance is " + strconv.FormatFloat(distance, 'f', 10, 64))
+	ul := model.GetUsersLib()
+	fc := facedetector.NewFaceDetector("images/trainingset-barrack.png")
+	barrack := model.NewUserFace()
+	barrack.User.FirstName = "Barrack"
+	barrack.User.LastName = "Obama"
+	user := ul.ImportIntoDB(fc, barrack)
+	if len(user.TrainingImages) != 3 {
+		t.Fatal("training length does not corresponded expetecd 3 obtenainded " + strconv.Itoa(len(user.TrainingImages)))
+	}
+	os.RemoveAll("Data")
 }

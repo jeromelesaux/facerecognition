@@ -5,6 +5,7 @@ import (
 	"facerecognition/algorithm"
 	"facerecognition/logger"
 	"github.com/disintegration/imaging"
+	"github.com/jbuchbinder/gopnm"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -150,4 +151,26 @@ func ToMatrix(path string) *algorithm.Matrix {
 
 		return matrix
 	}
+}
+
+func ToPgm(path string) string {
+	index := strings.LastIndex(path, ".")
+	pgmPath := path[0:index] + ".pgm"
+	f, err := os.Create(pgmPath)
+	if err != nil {
+		logger.Log(err.Error())
+		return ""
+	}
+	defer f.Close()
+	f2, err := os.Open(path)
+	if err != nil {
+		logger.Log(err.Error())
+		return ""
+	}
+	defer f2.Close()
+	imgSrc, _, _ := image.Decode(f2)
+	err = pnm.Encode(f, imgSrc, pnm.PGM)
+	logger.Log("File : " + pgmPath + " created.")
+	return pgmPath
+
 }

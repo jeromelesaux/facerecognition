@@ -56,10 +56,7 @@ func (t *Trainer) Train() {
 	t.Model = t.FeatureExtraction.ProjectedTrainingSet
 }
 func (t *Trainer) Recognize(matrix *algorithm.Matrix) string {
-	m := t.FeatureExtraction.W
-	m2 := m.Transpose()
-	testCase := m2.TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
-	//testCase := t.FeatureExtraction.W.Transpose().TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
+	testCase := t.FeatureExtraction.W.Transpose().TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
 	result := AssignLabel(t.Model, testCase, t.K, t.Metric)
 	return result
 }

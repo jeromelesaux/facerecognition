@@ -27,9 +27,9 @@ type FaceRecognitionResponse struct {
 
 func Compare(w http.ResponseWriter, r *http.Request) {
 	var err error
-	user := &model.User{}
+	//user := &model.User{}
 	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
-	userslib := model.GetUsersLib()
+	//userslib := model.GetUsersLib()
 
 	defer func() {
 		w.WriteHeader(200)
@@ -53,22 +53,22 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 		if name := part.FormName(); name != "" {
 
 			logger.Log(part.FileName())
-			img, err := imageFromMultipart(part)
+			//img, err := imageFromMultipart(part)
 			if err == nil {
-				faceFound := userslib.RecognizeFaceFromImage(img)
-				if faceFound.User.LastName != "" && faceFound.User.FirstName != "" {
-					user.FirstName = faceFound.User.FirstName
-					user.LastName = faceFound.User.LastName
-					response.FaceDetected = make([]string, 0)
-					for _, f := range faceFound.FacesDetected {
-						response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
-					}
-					response.User = *user
-					response.Average = faceVectorToBase64(faceFound.AverageFace)
-					response.PersonRecognized = "It seems to be " + faceFound.GetKey()
-				} else {
-					response.Error = "Not recognized."
-				}
+				//faceFound := userslib.RecognizeFaceFromImage(img)
+				//if faceFound.User.LastName != "" && faceFound.User.FirstName != "" {
+				//	user.FirstName = faceFound.User.FirstName
+				//	user.LastName = faceFound.User.LastName
+				//	response.FaceDetected = make([]string, 0)
+				//	for _, f := range faceFound.FacesDetected {
+				//		response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
+				//	}
+				//	response.User = *user
+				//	response.Average = faceVectorToBase64(faceFound.AverageFace)
+				//	response.PersonRecognized = "It seems to be " + faceFound.GetKey()
+				//} else {
+				//	response.Error = "Not recognized."
+				//}
 			}
 		}
 	}
@@ -131,14 +131,14 @@ func Training(w http.ResponseWriter, r *http.Request) {
 	if len(images) == 0 {
 		response.Error = "No images detected"
 	} else {
+		response.FaceDetected = make([]string, 0)
 		userFace.User = *user
 		userFace.DetectFacesFromImages(images)
-		userFace.TrainFaces()
-		userslib.AddUserFace(userFace)
-		response.Average = faceVectorToBase64(userFace.AverageFace)
-		response.FaceDetected = make([]string, 0)
-		for _, f := range userFace.FacesDetected {
-			response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
+		t := userslib.GetTrainer()
+		t.Train()
+		for _, file := range userFace.TrainingImages {
+			found := t.Recognize(model.ToMatrix(file).Vectorize())
+			response.FaceDetected = append(response.FaceDetected, found)
 		}
 	}
 
