@@ -102,7 +102,7 @@ func (u *UsersLib) save() {
 }
 
 func NewUserFace() *UserFace {
-	return &UserFace{}
+	return &UserFace{User: User{}}
 }
 
 func (u *UserFace) GetKey() string {
@@ -117,37 +117,40 @@ func (u *UserFace) DetectFacesFromImages(images []image.Image) {
 	}
 	for _, img := range images {
 		fd := facedetector.NewFaceDectectorFromImage(img)
-		rand.Seed(time.Now().UTC().UnixNano())
-		for i, r := range fd.GetFaces() {
-			b := make([]byte, 16)
-			rand.Read(b)
-			id := fmt.Sprintf("%s-%X", u.User.Key(), b)
-			dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
-			dst := image.NewRGBA(dstRect)
-			draw.Draw(dst, dstRect, fd.Image, image.Point{r.X, r.Y}, draw.Src)
-			filename := DataPath + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
-			fdst, _ := os.Create(filename)
-			defer fdst.Close()
-			png.Encode(fdst, dst)
-			logger.Log("File " + filename + "saved as png.")
-			newFilename := ToPgm(filename)
-			u.TrainingImages = append(u.TrainingImages, newFilename)
-			os.Remove(filename)
-			logger.Log("File " + filename + " removed")
-		}
+		u.storeImages(fd, userBasePath)
 	}
+}
+
+func (u *UserFace) storeImages(fd *facedetector.FaceDetector, basePath string) {
+	for i, r := range fd.GetFaces() {
+		b := make([]byte, 16)
+		rand.Read(b)
+		id := fmt.Sprintf("%s-%X", u.User.Key(), b)
+		dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
+		dst := image.NewRGBA(dstRect)
+		draw.Draw(dst, dstRect, fd.Image, image.Point{r.X, r.Y}, draw.Src)
+		filename := basePath + string(filepath.Separator) + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
+		fdst, _ := os.Create(filename)
+		defer fdst.Close()
+		png.Encode(fdst, dst)
+		logger.Log("File " + filename + "saved as png.")
+		newFilename := ToPgm(filename)
+		u.TrainingImages = append(u.TrainingImages, newFilename)
+		os.Remove(filename)
+		logger.Log("File " + filename + " removed")
+	}
+	return
 }
 
 func (u *UserFace) DetectFaces(images []string) {
 	userBasePath := DataPath + string(filepath.Separator) + u.GetKey()
-	_, err := os.Stat(userBasePath)
-	if err != nil {
+	if _, err := os.Stat(userBasePath); os.IsNotExist(err) {
 		os.MkdirAll(userBasePath, os.ModePerm)
 	}
 	for _, img := range images {
+		logger.Log("Searching faces in image file : " + img)
 		fd := facedetector.NewFaceDetector(img)
-		filespaths := fd.DrawImageInDirectory(userBasePath)
-		u.TrainingImages = append(u.TrainingImages, filespaths...)
+		u.storeImages(fd, userBasePath)
 	}
 	logger.Log("Found " + strconv.Itoa(len(u.TrainingImages)) + " faces.")
 	return
@@ -159,23 +162,7 @@ func (ul *UsersLib) ImportIntoDB(face *facedetector.FaceDetector, user *UserFace
 		os.MkdirAll(basePath, os.ModePerm)
 	}
 	rand.Seed(time.Now().UTC().UnixNano())
-	for i, r := range face.GetFaces() {
-		b := make([]byte, 16)
-		rand.Read(b)
-		id := fmt.Sprintf("%s-%X", user.User.Key(), b)
-		dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
-		dst := image.NewRGBA(dstRect)
-		draw.Draw(dst, dstRect, face.Image, image.Point{r.X, r.Y}, draw.Src)
-		filename := basePath + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
-		fdst, _ := os.Create(filename)
-		defer fdst.Close()
-		png.Encode(fdst, dst)
-		logger.Log("File " + filename + "saved as png.")
-		newFilename := ToPgm(filename)
-		user.TrainingImages = append(user.TrainingImages, newFilename)
-		os.Remove(filename)
-		logger.Log("File " + filename + " removed")
-	}
+	user.storeImages(face, basePath)
 	ul.AddUserFace(user)
 	return user
 }

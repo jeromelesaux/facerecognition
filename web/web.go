@@ -25,6 +25,8 @@ type FaceRecognitionResponse struct {
 	PersonRecognized string     `json:"person_recognized"`
 }
 
+var t *model.Trainer
+
 func Compare(w http.ResponseWriter, r *http.Request) {
 	var err error
 	//user := &model.User{}
