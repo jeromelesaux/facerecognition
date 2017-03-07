@@ -5,7 +5,7 @@ import (
 	"facerecognition/logger"
 )
 
-func AssignLabel(trainingSet []*ProjectedTrainingMatrix, testFace *algorithm.Matrix, k int, computeDistance func(a, b *algorithm.Matrix) float64) string {
+func AssignLabel(trainingSet []*ProjectedTrainingMatrix, testFace *algorithm.Matrix, k int, computeDistance func(a, b *algorithm.Matrix) float64) (string, float64) {
 	neighbors := FindKNN(trainingSet, testFace, k, computeDistance)
 	return Classify(neighbors)
 }
@@ -40,7 +40,7 @@ func FindKNN(trainingSet []*ProjectedTrainingMatrix, testFace *algorithm.Matrix,
 	return neighbors
 }
 
-func Classify(neighbors []*ProjectedTrainingMatrix) string {
+func Classify(neighbors []*ProjectedTrainingMatrix) (string, float64) {
 	mmap := make(map[string]float64)
 	num := len(neighbors)
 	for index := 0; index < num; index++ {
@@ -61,5 +61,5 @@ func Classify(neighbors []*ProjectedTrainingMatrix) string {
 			returnedLabel = label
 		}
 	}
-	return returnedLabel
+	return returnedLabel, maxSimilarity
 }

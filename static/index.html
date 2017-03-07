@@ -83,9 +83,9 @@
                             .css('color', 'red')
                             .css('font-size', '30px');
                 }
-//                if (obj.average != "") {
-//                    $('#user_average').html('Average face : <img src="data:image/png;base64,' + obj.average + '"/>');
-//                }
+                if (obj.average != "") {
+                    $('#user_average').html('Average face : <img src="data:image/png;base64,' + obj.average + '"/>');
+                }
 ////                if (obj.faces_detected.length > 0) {
 //                    var detectedHtml = "";
 //                    for (var i = 0; i < obj.faces_detected.length; i++)
@@ -94,6 +94,10 @@
 //                }
                 if (obj.person_recognized != "") {
                     $('#user_recognized').html(obj.person_recognized)
+                        .css('font-size', '20px')
+                }
+                if (obj.distance != "") {
+                    $('#distance').html(obj.distance)
                         .css('font-size', '20px')
                 }
                 $('#user_firstname').html("First Name :" + obj.user.first_name);
@@ -115,6 +119,7 @@
 <div id="user_detected"></div>
 <div id="user_firstname"></div>
 <div id="user_lastname"></div>
+<div id="distance"></div>
 
 
 <form method="post" enctype="multipart/form-data" action="train">

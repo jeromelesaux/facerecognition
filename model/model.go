@@ -158,8 +158,22 @@ func normalizeImage(u *UsersLib, path string) {
 	}
 }
 
-func (u *UsersLib) FindFace(img *image.Image) []*algorithm.Matrix {
+func (u *UsersLib) MatrixNVectorize(img *image.Image) *algorithm.Matrix {
+	filename := DataPath + string(filepath.Separator) + "tmp" + string(filepath.Separator) + "raw.pgm"
+	f, err := os.Create(filename)
+	if err != nil {
+		logger.Log(err.Error())
+		return &algorithm.Matrix{}
+	}
+	defer f.Close()
+	pnm.Encode(f, *img, pnm.PGM)
+	normalizeImage(u, filename)
+	return ToMatrix(filename).Vectorize()
+}
+
+func (u *UsersLib) FindFace(img *image.Image) ([]*algorithm.Matrix, []string) {
 	mats := make([]*algorithm.Matrix, 0)
+	filesnames := make([]string, 0)
 	fd := facedetector.NewFaceDectectorFromImage(*img)
 	for i, r := range fd.GetFaces() {
 		b := make([]byte, 16)
@@ -177,8 +191,9 @@ func (u *UsersLib) FindFace(img *image.Image) []*algorithm.Matrix {
 		os.Remove(filename)
 		normalizeImage(u, newFilename)
 		mats = append(mats, ToMatrix(newFilename).Vectorize())
+		filesnames = append(filesnames, newFilename)
 	}
-	return mats
+	return mats, filesnames
 }
 func NewUserFace() *UserFace {
 	return &UserFace{User: User{}}

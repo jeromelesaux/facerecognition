@@ -69,13 +69,13 @@ func ToVector(path string) (int, int, []float64) {
 	return width, height, face
 }
 
-func ToImage(face []float64) *image.Gray16 {
-	bounds := image.Rect(0, 0, Width, Height)
+func ToImage(face *algorithm.Matrix) *image.Gray16 {
+	bounds := image.Rect(0, 0, face.N, face.M)
 	im := image.NewGray16(bounds)
-	for y := 0; y < Height; y++ {
-		for x := 0; x < Width; x++ {
+	for y := 0; y < face.M; y++ {
+		for x := 0; x < face.N; x++ {
 			// ORL database images are 16-bit grayscale
-			value := uint16(face[y+x])
+			value := uint16(face.A[y][x])
 			im.SetGray16(x, y, color.Gray16{value})
 		}
 	}

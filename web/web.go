@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"facerecognition/algorithm"
 	"facerecognition/logger"
 	"facerecognition/model"
 	"image"
@@ -15,6 +16,8 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type FaceRecognitionResponse struct {
@@ -23,6 +26,7 @@ type FaceRecognitionResponse struct {
 	Average          string     `json:"average"`
 	FaceDetected     []string   `json:"faces_detected"`
 	PersonRecognized string     `json:"person_recognized"`
+	Distance         float64    `json:"distance"`
 }
 
 var t *model.Trainer
@@ -58,34 +62,26 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 			logger.Log(part.FileName())
 			img, err := imageFromMultipart(part)
 			if err == nil {
-				mats := userslib.FindFace(&img)
+				mats, files := userslib.FindFace(&img)
 				t := userslib.GetTrainer()
 				t.Train()
+				if len(mats) == 0 {
+					mats = append(mats, userslib.MatrixNVectorize(&img))
+				}
 				for _, m := range mats {
-					p := t.Recognize(m)
-					logger.Log("Found " + p)
+					p, distance := t.Recognize(m)
+					logger.Log("Found " + p + " distance " + strconv.FormatFloat(distance, 'f', 2, 32))
 					if p != "" {
 						response.User = userslib.UsersFace[p].User
+						response.Distance = distance
+						response.Average = pathToBase64(files[0])
 						//response.Average faceVectorToBase64(m)
 						response.PersonRecognized = "It seems to be " + response.User.ToString()
 					} else {
 						response.Error = "Not recognized."
 					}
 				}
-				//faceFound := userslib.RecognizeFaceFromImage(img)
-				//if faceFound.User.LastName != "" && faceFound.User.FirstName != "" {
-				//	user.FirstName = faceFound.User.FirstName
-				//	user.LastName = faceFound.User.LastName
-				//	response.FaceDetected = make([]string, 0)
-				//	for _, f := range faceFound.FacesDetected {
-				//		response.FaceDetected = append(response.FaceDetected, faceVectorToBase64(f))
-				//	}
-				//	response.User = *user
-				//	response.Average = faceVectorToBase64(faceFound.AverageFace)
-				//	response.PersonRecognized = "It seems to be " + faceFound.GetKey()
-				//} else {
-				//	response.Error = "Not recognized."
-				//}
+
 			}
 		}
 	}
@@ -154,7 +150,7 @@ func Training(w http.ResponseWriter, r *http.Request) {
 		t := userslib.GetTrainer()
 		t.Train()
 		for _, file := range userFace.TrainingImages {
-			found := t.Recognize(model.ToMatrix(file).Vectorize())
+			found, _ := t.Recognize(model.ToMatrix(file).Vectorize())
 			response.FaceDetected = append(response.FaceDetected, found)
 		}
 	}
@@ -171,10 +167,31 @@ func sendJson(w http.ResponseWriter, i interface{}) {
 	}
 }
 
-func faceVectorToBase64(f []float64) string {
+func faceVectorToBase64(f *algorithm.Matrix) string {
 	img := model.ToImage(f)
 	buf := new(bytes.Buffer)
 	err := png.Encode(buf, img)
+	if err != nil {
+		logger.Log(err.Error())
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes())
+}
+
+func pathToBase64(f string) string {
+	fh, _ := os.Open(f)
+	defer fh.Close()
+	img, _, _ := image.Decode(fh)
+	buf := new(bytes.Buffer)
+	err := png.Encode(buf, img)
+	if err != nil {
+		logger.Log(err.Error())
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes())
+}
+
+func imageToBase64(img *image.Image) string {
+	buf := new(bytes.Buffer)
+	err := png.Encode(buf, *img)
 	if err != nil {
 		logger.Log(err.Error())
 	}

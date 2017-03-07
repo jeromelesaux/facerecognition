@@ -34,16 +34,21 @@ func TestS1Trainer(t *testing.T) {
 	}
 	trainer.Train()
 	mat := model.ToMatrix("faces/s2/4.pgm")
-	personFound1 := trainer.Recognize(mat.Vectorize())
-	logger.Log("found :" + personFound1)
+	personFound1, distance := trainer.Recognize(mat.Vectorize())
+	logger.Log("found :" + personFound1 + " distance : " + strconv.FormatFloat(distance, 'f', 2, 32))
 	if "john" != personFound1 {
 		t.Fatal("Expected john and " + personFound1 + " found")
 	}
+	if distance < .9 {
+		t.Fatal("Expected more than .9 obtained : " + strconv.FormatFloat(distance, 'f', 2, 32))
+	}
 	mat2 := model.ToMatrix("faces/s4/4.pgm")
-	personFound2 := trainer.Recognize(mat2.Vectorize())
-	logger.Log("found :" + personFound2)
+	personFound2, distance := trainer.Recognize(mat2.Vectorize())
+	logger.Log("found :" + personFound2 + " distance : " + strconv.FormatFloat(distance, 'f', 2, 32))
 	if "smith" != personFound2 {
 		t.Fatal("Expected john and " + personFound2 + " found")
 	}
-
+	if distance < .9 {
+		t.Fatal("Expected more than .9 obtained : " + strconv.FormatFloat(distance, 'f', 2, 32))
+	}
 }

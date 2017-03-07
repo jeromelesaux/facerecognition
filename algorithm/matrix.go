@@ -259,3 +259,14 @@ func (mat *Matrix) Vectorize() *Matrix {
 
 	return result
 }
+
+func (mat *Matrix) UnVectorize(width, height int) *Matrix {
+	result := NewMatrix(width, height)
+
+	for p := 0; p < result.N; p++ {
+		for q := 0; q < result.M; q++ {
+			result.A[q][p] = mat.A[p*result.M+q][0]
+		}
+	}
+	return result
+}
