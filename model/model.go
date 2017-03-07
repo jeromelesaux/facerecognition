@@ -3,8 +3,11 @@ package model
 import (
 	"encoding/json"
 	"facedetection/facedetector"
+	"facerecognition/algorithm"
 	"facerecognition/logger"
 	"fmt"
+	"github.com/jbuchbinder/gopnm"
+	"github.com/nfnt/resize"
 	"image"
 	"image/draw"
 	_ "image/jpeg"
@@ -39,6 +42,8 @@ type UserFace struct {
 type UsersLib struct {
 	UsersFace              map[string]*UserFace `json:"users_lib"`
 	MinimalNumOfComponents int
+	Width                  int
+	Height                 int
 }
 
 var (
@@ -101,6 +106,80 @@ func (u *UsersLib) save() {
 	}
 }
 
+func (u *UsersLib) NormalizeImageLength() {
+	width := 100000
+	height := 100000
+	for _, user := range u.UsersFace {
+		for _, img := range user.TrainingImages {
+			logger.Log("Image loaded : " + img + " for user " + user.GetKey())
+			f, err := os.Open(img)
+			if err == nil {
+				defer f.Close()
+				i, _, _ := image.Decode(f)
+				imgWidth := i.Bounds().Max.X
+				imgHeight := i.Bounds().Max.Y
+				if imgWidth < width {
+					width = imgWidth
+				}
+				if imgHeight < height {
+					height = imgHeight
+				}
+			}
+
+		}
+	}
+	u.Width = width
+	u.Height = width
+	for _, user := range u.UsersFace {
+		for _, img := range user.TrainingImages {
+			normalizeImage(u, img)
+		}
+	}
+}
+
+func normalizeImage(u *UsersLib, path string) {
+	logger.Log("Normalized image " + path + " with size width " + strconv.Itoa(u.Width) + " and height " + strconv.Itoa(u.Height))
+	f, err := os.Open(path)
+	if err == nil {
+		defer f.Close()
+		i, _, _ := image.Decode(f)
+		ir := resize.Resize(uint(u.Width), uint(u.Height), i, resize.Lanczos3)
+		fw, err := os.Create(path)
+		if err == nil {
+
+			defer fw.Close()
+			err = pnm.Encode(fw, ir, pnm.PGM)
+			if err != nil {
+				logger.Log(err.Error())
+			}
+		} else {
+			logger.Log(err.Error())
+		}
+	}
+}
+
+func (u *UsersLib) FindFace(img *image.Image) []*algorithm.Matrix {
+	mats := make([]*algorithm.Matrix, 0)
+	fd := facedetector.NewFaceDectectorFromImage(*img)
+	for i, r := range fd.GetFaces() {
+		b := make([]byte, 16)
+		rand.Read(b)
+		id := fmt.Sprintf("tofind-%X", b)
+		dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
+		dst := image.NewRGBA(dstRect)
+		draw.Draw(dst, dstRect, fd.Image, image.Point{r.X, r.Y}, draw.Src)
+		filename := DataPath + string(filepath.Separator) + "tmp" + string(filepath.Separator) + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
+		fdst, _ := os.Create(filename)
+		defer fdst.Close()
+		png.Encode(fdst, dst)
+		logger.Log("File " + filename + "saved as png.")
+		newFilename := ToPgm(filename)
+		os.Remove(filename)
+		normalizeImage(u, newFilename)
+		mats = append(mats, ToMatrix(newFilename).Vectorize())
+	}
+	return mats
+}
 func NewUserFace() *UserFace {
 	return &UserFace{User: User{}}
 }
@@ -122,6 +201,7 @@ func (u *UserFace) DetectFacesFromImages(images []image.Image) {
 }
 
 func (u *UserFace) storeImages(fd *facedetector.FaceDetector, basePath string) {
+	rand.Seed(time.Now().UTC().UnixNano())
 	for i, r := range fd.GetFaces() {
 		b := make([]byte, 16)
 		rand.Read(b)
@@ -161,7 +241,7 @@ func (ul *UsersLib) ImportIntoDB(face *facedetector.FaceDetector, user *UserFace
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		os.MkdirAll(basePath, os.ModePerm)
 	}
-	rand.Seed(time.Now().UTC().UnixNano())
+
 	user.storeImages(face, basePath)
 	ul.AddUserFace(user)
 	return user
@@ -177,12 +257,14 @@ func (ul *UsersLib) GetTrainer() *Trainer {
 
 	for username, user := range ul.UsersFace {
 		numOfComponents := 0
-		for _, path := range user.TrainingImages {
-			numOfComponents++
-			if numOfComponents > ul.MinimalNumOfComponents {
-				break
-			} else {
-				t.Add(ToMatrix(path).Vectorize(), username)
+		if len(user.TrainingImages) > 0 {
+			for _, path := range user.TrainingImages {
+				numOfComponents++
+				if numOfComponents > ul.MinimalNumOfComponents {
+					break
+				} else {
+					t.Add(ToMatrix(path).Vectorize(), username)
+				}
 			}
 		}
 	}

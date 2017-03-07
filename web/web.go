@@ -31,7 +31,8 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 	var err error
 	//user := &model.User{}
 	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
-	//userslib := model.GetUsersLib()
+	userslib := model.GetUsersLib()
+	userslib.NormalizeImageLength()
 
 	defer func() {
 		w.WriteHeader(200)
@@ -55,8 +56,22 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 		if name := part.FormName(); name != "" {
 
 			logger.Log(part.FileName())
-			//img, err := imageFromMultipart(part)
+			img, err := imageFromMultipart(part)
 			if err == nil {
+				mats := userslib.FindFace(&img)
+				t := userslib.GetTrainer()
+				t.Train()
+				for _, m := range mats {
+					p := t.Recognize(m)
+					logger.Log("Found " + p)
+					if p != "" {
+						response.User = userslib.UsersFace[p].User
+						//response.Average faceVectorToBase64(m)
+						response.PersonRecognized = "It seems to be " + response.User.ToString()
+					} else {
+						response.Error = "Not recognized."
+					}
+				}
 				//faceFound := userslib.RecognizeFaceFromImage(img)
 				//if faceFound.User.LastName != "" && faceFound.User.FirstName != "" {
 				//	user.FirstName = faceFound.User.FirstName
