@@ -67,6 +67,8 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 				t.Train()
 				if len(mats) == 0 {
 					mats = append(mats, userslib.MatrixNVectorize(&img))
+
+					//files = append(files, img)
 				}
 				for _, m := range mats {
 					p, distance := t.Recognize(m)
@@ -74,7 +76,11 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 					if p != "" {
 						response.User = userslib.UsersFace[p].User
 						response.Distance = distance
-						response.Average = pathToBase64(files[0])
+						if len(files) == 0 {
+							response.Average = imageToBase64(&img)
+						} else {
+							response.Average = pathToBase64(files[0])
+						}
 						//response.Average faceVectorToBase64(m)
 						response.PersonRecognized = "It seems to be " + response.User.ToString()
 					} else {

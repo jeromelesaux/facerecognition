@@ -115,14 +115,17 @@ func (u *UsersLib) NormalizeImageLength() {
 			f, err := os.Open(img)
 			if err == nil {
 				defer f.Close()
-				i, _, _ := image.Decode(f)
-				imgWidth := i.Bounds().Max.X
-				imgHeight := i.Bounds().Max.Y
-				if imgWidth < width {
-					width = imgWidth
-				}
-				if imgHeight < height {
-					height = imgHeight
+				i, _, err := image.Decode(f)
+				if err == nil {
+					imgWidth := i.Bounds().Max.X
+					imgHeight := i.Bounds().Max.Y
+					logger.Log("image size : " + strconv.Itoa(imgWidth) + "," + strconv.Itoa(imgHeight))
+					if imgWidth < width {
+						width = imgWidth
+					}
+					if imgHeight < height {
+						height = imgHeight
+					}
 				}
 			}
 
@@ -142,14 +145,18 @@ func normalizeImage(u *UsersLib, path string) {
 	f, err := os.Open(path)
 	if err == nil {
 		defer f.Close()
-		i, _, _ := image.Decode(f)
-		ir := resize.Resize(uint(u.Width), uint(u.Height), i, resize.Lanczos3)
-		fw, err := os.Create(path)
+		i, _, err := image.Decode(f)
 		if err == nil {
+			ir := resize.Resize(uint(u.Width), uint(u.Height), i, resize.Lanczos3)
+			fw, err := os.Create(path)
+			if err == nil {
 
-			defer fw.Close()
-			err = pnm.Encode(fw, ir, pnm.PGM)
-			if err != nil {
+				defer fw.Close()
+				err = pnm.Encode(fw, ir, pnm.PGM)
+				if err != nil {
+					logger.Log(err.Error())
+				}
+			} else {
 				logger.Log(err.Error())
 			}
 		} else {
