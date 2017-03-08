@@ -150,15 +150,11 @@ func Training(w http.ResponseWriter, r *http.Request) {
 	if len(images) == 0 {
 		response.Error = "No images detected"
 	} else {
-		response.FaceDetected = make([]string, 0)
+
 		userFace.User = *user
+		logger.Log("Adding " + userFace.GetKey())
 		userFace.DetectFacesFromImages(images)
-		t := userslib.GetTrainer()
-		t.Train()
-		for _, file := range userFace.TrainingImages {
-			found, _ := t.Recognize(model.ToMatrix(file).Vectorize())
-			response.FaceDetected = append(response.FaceDetected, found)
-		}
+		userslib.AddUserFace(userFace)
 	}
 
 	response.User = *user
