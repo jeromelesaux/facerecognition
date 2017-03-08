@@ -86,12 +86,12 @@
                 if (obj.average != "") {
                     $('#user_average').html('Average face : <img src="data:image/png;base64,' + obj.average + '"/>');
                 }
-////                if (obj.faces_detected.length > 0) {
-//                    var detectedHtml = "";
-//                    for (var i = 0; i < obj.faces_detected.length; i++)
-//                        detectedHtml += 'Face found ' + (i + 1) + '<img src="data:image/png;base64,' + obj.faces_detected[i] + '"/>';
-//                    $('#user_detected').html(detectedHtml);
-//                }
+                if (obj.faces_detected.length > 0) {
+                    var detectedHtml = "";
+                    for (var i = 0; i < obj.faces_detected.length; i++)
+                        detectedHtml += 'Face found ' + (i + 1) + '<img src="data:image/png;base64,' + obj.faces_detected[i] + '"/>';
+                    $('#user_detected').html(detectedHtml);
+                }
                 if (obj.person_recognized != "") {
                     $('#user_recognized').html(obj.person_recognized)
                         .css('font-size', '20px')

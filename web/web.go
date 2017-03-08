@@ -81,7 +81,9 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 						} else {
 							response.Average = pathToBase64(files[0])
 						}
-						//response.Average faceVectorToBase64(m)
+						for _, f := range userslib.UsersFace[p].TrainingImages {
+							response.FaceDetected = append(response.FaceDetected, pathToBase64(f))
+						}
 						response.PersonRecognized = "It seems to be " + response.User.ToString()
 					} else {
 						response.Error = "Not recognized."
