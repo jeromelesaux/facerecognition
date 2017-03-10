@@ -67,15 +67,15 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 				t.Train()
 				if len(mats) == 0 {
 					mats = append(mats, userslib.MatrixNVectorize(&img))
-
-					//files = append(files, img)
 				}
 				for _, m := range mats {
 					p, distance := t.Recognize(m)
 					logger.Log("Found " + p + " distance " + strconv.FormatFloat(distance, 'f', 2, 32))
 					if p != "" {
 						response.User = userslib.UsersFace[p].User
-						response.Distance = distance
+
+						response.Distance = 0.0
+
 						if len(files) == 0 {
 							response.Average = imageToBase64(&img)
 						} else {

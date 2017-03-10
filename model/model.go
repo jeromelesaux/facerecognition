@@ -274,8 +274,8 @@ func (ul *UsersLib) GetTrainer() *Trainer {
 	// determiner numOfComponents
 	// et ne pas insérer l'image d'un utilisateur sir numOfComponents est
 	// dépassé pour cet utilisateur.
-	getDistanceFunc := &CosineDissimilarity{}
-	t := NewTrainerArgs("PCA", 1, ul.MinimalNumOfComponents, getDistanceFunc.GetDistance)
+	getDistanceFunc := &L1{}
+	t := NewTrainerArgs("PCA", len(ul.UsersFace), ul.MinimalNumOfComponents, getDistanceFunc.GetDistance)
 
 	for username, user := range ul.UsersFace {
 		numOfComponents := 0
