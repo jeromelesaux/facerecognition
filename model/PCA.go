@@ -1,8 +1,8 @@
 package model
 
 import (
-	"facerecognition/algorithm"
-	"facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 	"math"
 )
 

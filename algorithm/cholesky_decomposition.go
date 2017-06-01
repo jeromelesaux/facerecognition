@@ -1,7 +1,7 @@
 package algorithm
 
 import (
-	"facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/logger"
 	"math"
 )
 

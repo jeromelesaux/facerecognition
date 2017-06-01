@@ -1,8 +1,8 @@
 package testFacerecognition
 
 import (
-	"facedetection/facedetector"
-	"facerecognition/model"
+	"github.com/jeromelesaux/facedetection/facedetector"
+	"github.com/jeromelesaux/facerecognition/model"
 	_ "image/png"
 	"os"
 	"strconv"

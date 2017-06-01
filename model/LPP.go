@@ -1,9 +1,9 @@
 package model
 
 import (
-	"facerecognition/algorithm"
-	"facerecognition/logger"
 	"github.com/cnf/structhash"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
 type LPP struct {

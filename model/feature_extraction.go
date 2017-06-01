@@ -1,7 +1,7 @@
 package model
 
 import (
-	"facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/algorithm"
 	"sort"
 	"strconv"
 )

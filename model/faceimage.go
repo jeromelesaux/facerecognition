@@ -2,10 +2,10 @@ package model
 
 import (
 	"bufio"
-	"facerecognition/algorithm"
-	"facerecognition/logger"
 	"github.com/disintegration/imaging"
 	"github.com/jbuchbinder/gopnm"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 	"image"
 	"image/color"
 	_ "image/png"

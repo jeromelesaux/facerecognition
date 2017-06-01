@@ -1,8 +1,8 @@
 package testFacerecognition
 
 import (
-	"facerecognition/logger"
-	"facerecognition/model"
+	"github.com/jeromelesaux/facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/model"
 	"strconv"
 	"testing"
 )

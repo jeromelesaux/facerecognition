@@ -1,8 +1,8 @@
 package model
 
 import (
-	"facerecognition/algorithm"
-	"facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
 func AssignLabel(trainingSet []*ProjectedTrainingMatrix, testFace *algorithm.Matrix, k int, computeDistance func(a, b *algorithm.Matrix) float64) (string, float64) {

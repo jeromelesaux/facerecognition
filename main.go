@@ -1,10 +1,10 @@
 package main
 
 import (
-	"facerecognition/logger"
-	"facerecognition/model"
-	"facerecognition/web"
 	"flag"
+	"github.com/jeromelesaux/facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/model"
+	"github.com/jeromelesaux/facerecognition/web"
 	"net/http"
 )
 

@@ -2,11 +2,11 @@ package model
 
 import (
 	"encoding/json"
-	"facedetection/facedetector"
-	"facerecognition/algorithm"
-	"facerecognition/logger"
 	"fmt"
 	"github.com/jbuchbinder/gopnm"
+	"github.com/jeromelesaux/facedetection/facedetector"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 	"github.com/nfnt/resize"
 	"image"
 	"image/draw"
