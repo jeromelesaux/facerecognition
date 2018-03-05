@@ -4,6 +4,7 @@ import (
 	"github.com/jeromelesaux/facerecognition/algorithm"
 	"github.com/jeromelesaux/facerecognition/logger"
 	"math"
+	"strconv"
 )
 
 type PCA struct {
@@ -27,6 +28,7 @@ func NewPCA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 }
 
 func (p *PCA) GetMean(input []*algorithm.Matrix) *algorithm.Matrix {
+	logger.Log(strconv.Itoa(len(input)))
 	rows := input[0].RowsDimension()
 	length := len(input)
 	all := algorithm.NewMatrix(rows, 1)

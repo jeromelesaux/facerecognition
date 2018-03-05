@@ -4,7 +4,6 @@ import (
 	"github.com/jeromelesaux/facedetection/facedetector"
 	"github.com/jeromelesaux/facerecognition/model"
 	_ "image/png"
-	"os"
 	"strconv"
 	"testing"
 )
@@ -89,14 +88,21 @@ func TestDetectGeorge(t *testing.T) {
 //}
 
 func TestDetectAndTrainBarrack(t *testing.T) {
-	ul := model.GetUsersLib()
+	ul := model.GetFaceRecognitionLib()
 	fc := facedetector.NewFaceDetector("images/trainingset-barrack.png")
-	barrack := model.NewUserFace()
+	barrack := model.NewFaceRecognitionItem()
 	barrack.User.FirstName = "Barrack"
 	barrack.User.LastName = "Obama"
 	user := ul.ImportIntoDB(fc, barrack)
 	if len(user.TrainingImages) != 3 {
 		t.Fatal("training length does not corresponded expetecd 3 obtenainded " + strconv.Itoa(len(user.TrainingImages)))
 	}
-	os.RemoveAll("Data")
+	//os.RemoveAll("Data")
+}
+
+func TestDetectFaceWomen(t *testing.T) {
+	uf := model.NewFaceRecognitionItem()
+	uf.DetectFaces([]string{"images/32m54jg7.jpg"})
+
+	t.Logf("%v", uf.User)
 }

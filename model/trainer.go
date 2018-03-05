@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
 type Trainer struct {
@@ -39,6 +40,11 @@ func (t *Trainer) Add(m *algorithm.Matrix, label string) {
 }
 
 func (t *Trainer) Train() {
+	if t.NumOfComponents == 0 {
+		logger.Log("No components to compute. Exit")
+		return
+	}
+	logger.Logf("%d,%d,%d", len(t.TrainingSet), len(t.TrainingLabels), t.NumOfComponents)
 	switch t.FeatureType {
 	case "PCA":
 		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
@@ -51,6 +57,7 @@ func (t *Trainer) Train() {
 	case "LPP":
 		l := NewLPP(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
+		break
 	}
 
 	t.Model = t.FeatureExtraction.ProjectedTrainingSet

@@ -9,10 +9,28 @@ import (
 	"testing"
 )
 
+func TestBarrackObamaDetection(t *testing.T) {
+	userslib := model.GetFaceRecognitionLib()
+	f, err := os.Open("images/barack.png")
+	if err != nil {
+		t.Fatalf("expected image and gets error %v", err)
+	}
+
+	img, _, _ := image.Decode(f)
+	mats, files := userslib.FindFace(&img)
+	if len(mats) == 0 {
+		t.Fatal("expected len mats > to 0")
+	}
+	if len(files) == 0 {
+		t.Fatal("expected len files > to 0")
+	}
+	t.Logf("Return [%d] images.", len(mats))
+}
+
 func TestBarrackTrainer(t *testing.T) {
 	//m := &model.CosineDissimilarity{}
 	//trainer := model.NewTrainerArgs("PCA", 1, 3, m.GetDistance)
-	userslib := model.GetUsersLib()
+	userslib := model.GetFaceRecognitionLib()
 	f, _ := os.Open("images/trainingset-barrack.png")
 	img, _, _ := image.Decode(f)
 	mats, files := userslib.FindFace(&img)
