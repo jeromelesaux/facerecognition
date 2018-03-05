@@ -1,0 +1,4 @@
+{
+    "opencvfile":"haarcascade_frontalface_default.xml",
+    "facerecognitionbasepath" : "Data"
+}
