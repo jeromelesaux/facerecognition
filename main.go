@@ -52,7 +52,7 @@ func main() {
 		}
 		if *recognize != false {
 			lib := model.GetFaceRecognitionLib()
-			t := lib.GetTrainer()
+			t := lib.GetTrainer("PCA")
 			t.Train()
 			for _, i := range imagesfiles {
 				f, err := os.Open(i)
@@ -65,6 +65,9 @@ func main() {
 						logger.Logf("error while decoding file %s with error %v", i, err)
 					} else {
 						mats, _ := lib.FindFace(&img)
+						if len(mats) == 0 {
+							mats = append(mats, lib.MatrixNVectorize(&img))
+						}
 						logger.Logf("found %d faces.", len(mats))
 						for _, m := range mats {
 							p, distance := t.Recognize(m)

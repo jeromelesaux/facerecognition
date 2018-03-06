@@ -561,14 +561,14 @@ func (e *EigenvalueDecomposition) Hqr2() {
 				}
 				m--
 			}
-			for i := m + 2; i <= e.N; i++ {
+			for i := m + 2; i <= n; i++ {
 				e.H[i][i-2] = 0.0
 				if i > m+2 {
 					e.H[i][i-3] = 0.0
 				}
 			}
 			// Double QR step involving rows l:n and columns m:n
-			for k := m; k <= e.N-1; k++ {
+			for k := m; k <= n-1; k++ {
 				notlast := (k != n-1)
 				if k != m {
 					p = e.H[k][k-1]
@@ -615,7 +615,7 @@ func (e *EigenvalueDecomposition) Hqr2() {
 						e.H[k+1][j] = e.H[k+1][j] - p*y
 					}
 					// Column modification
-					for i := 0; i <= minInt(e.N, k+3); i++ {
+					for i := 0; i <= minInt(n, k+3); i++ {
 						p = x*e.H[i][k] + y*e.H[i][k+1]
 						if notlast {
 							p = p + z*e.H[i][k+2]

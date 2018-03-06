@@ -41,7 +41,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
 	libload.Do(func() {
 		frlib = model.GetFaceRecognitionLib()
-		t = frlib.GetTrainer()
+		t = frlib.GetTrainer("PCA")
 		t.Train()
 	})
 
@@ -69,7 +69,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 			img, err := imageFromMultipart(part)
 			if err == nil {
 				mats, files := frlib.FindFace(&img)
-				frlib.Train()
+				frlib.Train("PCA")
 				if len(mats) == 0 {
 					mats = append(mats, frlib.MatrixNVectorize(&img))
 				}

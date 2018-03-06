@@ -24,6 +24,7 @@ func FindKNN(trainingSet []*ProjectedTrainingMatrix, testFace *algorithm.Matrix,
 	}
 	// go through the remaining records in the trainingSet to find K nearest
 	// neighbors
+
 	for i := k; i < numOfTrainingSet; i++ {
 		trainingSet[i].Distance = computeDistance(trainingSet[i].Matrix, testFace)
 		maxIndex := 0

@@ -75,7 +75,16 @@ func (c *CholeskyDecomposition) Solve(B *Matrix) *Matrix {
 
 	var X [][]float64
 	// Copy right hand side.
-	copy(X, B.A)
+	X = make([][]float64, B.M)
+
+	for i := 0; i < B.M; i++ {
+		X[i] = make([]float64, B.N)
+	}
+	for i := 0; i < B.M; i++ {
+		for j := 0; j < B.N; j++ {
+			X[i][j] = B.A[i][j]
+		}
+	}
 
 	nx := B.ColumnsDimension()
 

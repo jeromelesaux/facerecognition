@@ -37,10 +37,20 @@ func NewLUDecomposition(a *Matrix) *LUDecomposition {
 	lud := &LUDecomposition{}
 
 	// Use a "left-looking", dot-product, Crout/Doolittle algorithm.
-	copy(lud.LU, a.A)
+
 	lud.M = a.RowsDimension()
 	lud.N = a.ColumnsDimension()
-	lud.Piv = make([]int, lud.N)
+	lud.Piv = make([]int, lud.M)
+	lud.LU = make([][]float64, a.M)
+
+	for i := 0; i < a.M; i++ {
+		lud.LU[i] = make([]float64, a.N)
+	}
+	for i := 0; i < a.M; i++ {
+		for j := 0; j < a.N; j++ {
+			lud.LU[i][j] = a.A[i][j]
+		}
+	}
 
 	for i := 0; i < lud.M; i++ {
 		lud.Piv[i] = i

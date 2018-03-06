@@ -38,7 +38,7 @@ func NewLPP(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	feature := targetForEigen.Eig()
 	d := feature.Getd()
 	if len(d) < c-1 {
-		logger.Log("Ensure that the number of eigenvalues is larger than c - 1")
+		logger.Logf("Ensure that the number of eigenvalues is larger than c - 1 (%d,%d)", len(d), (c - 1))
 		return lpp
 	}
 	indexes := GetIndexesOfKEigenvalues(d, len(d))
@@ -60,8 +60,7 @@ func construcNearestNeighborGraph(input []*ProjectedTrainingMatrix) *algorithm.M
 	size := len(input)
 	s := algorithm.NewMatrix(size, size)
 	euclidean := &Euclidean{}
-	trainArray := make([]*ProjectedTrainingMatrix, size)
-
+	trainArray := NewSliceProjectedTrainingMatrix(input)
 	for i := 0; i < size; i++ {
 		neighbors := FindKNN(trainArray, input[i].Matrix, 3, euclidean.GetDistance)
 		hashIndexes := hashMatrices(neighbors)

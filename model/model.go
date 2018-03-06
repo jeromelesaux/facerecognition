@@ -86,6 +86,7 @@ func (frl *FaceRecognitionLib) load() {
 		logger.Log(err.Error())
 		return
 	}
+	frl.MinimalNumOfComponents = len(frl.Items)
 }
 
 func (frl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
@@ -198,6 +199,7 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 	for i, r := range fd.GetFaces() {
 		wc.Add(1)
 		go func() {
+			logger.Logf("%v", r)
 			defer wc.Done()
 			b := make([]byte, 16)
 			rand.Read(b)
@@ -302,18 +304,18 @@ func (frl *FaceRecognitionLib) ImportIntoDB(face *facedetector.FaceDetector, use
 	return user
 }
 
-func (frl *FaceRecognitionLib) Train() {
-	t := frl.GetTrainer()
+func (frl *FaceRecognitionLib) Train(modelType string) {
+	t := frl.GetTrainer(modelType)
 	t.Train()
 }
 
-func (frl *FaceRecognitionLib) GetTrainer() *Trainer {
+func (frl *FaceRecognitionLib) GetTrainer(modelType string) *Trainer {
 	// recuperation du nombre minimal d'image d'entrainement pour
 	// determiner numOfComponents
 	// et ne pas insérer l'image d'un utilisateur sir numOfComponents est
 	// dépassé pour cet utilisateur.
 	getDistanceFunc := &L1{}
-	t := NewTrainerArgs("PCA", len(frl.Items), frl.MinimalNumOfComponents, getDistanceFunc.GetDistance)
+	t := NewTrainerArgs(modelType, len(frl.Items), len(frl.Items)+1, getDistanceFunc.GetDistance)
 
 	for username, user := range frl.Items {
 		numOfComponents := 0

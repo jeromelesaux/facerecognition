@@ -14,7 +14,18 @@ type QRDecomposition struct {
 
 func NewQRDecomposition(a *Matrix) *QRDecomposition {
 	qr := &QRDecomposition{M: a.RowsDimension(), N: a.ColumnsDimension()}
-	copy(qr.QR, a.A)
+
+	qr.QR = make([][]float64, a.M)
+
+	for i := 0; i < a.M; i++ {
+		qr.QR[i] = make([]float64, a.N)
+	}
+	for i := 0; i < a.M; i++ {
+		for j := 0; j < a.N; j++ {
+			qr.QR[i][j] = a.A[i][j]
+		}
+	}
+
 	qr.Rdiag = make([]float64, qr.N)
 	// Main loop.
 	for k := 0; k < qr.N; k++ {
