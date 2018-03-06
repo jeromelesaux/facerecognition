@@ -44,7 +44,6 @@ func (t *Trainer) Train() {
 		logger.Log("No components to compute. Exit")
 		return
 	}
-	logger.Logf("%d,%d,%d", len(t.TrainingSet), len(t.TrainingLabels), t.NumOfComponents)
 	switch t.FeatureType {
 	case "PCA":
 		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)

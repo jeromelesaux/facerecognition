@@ -41,6 +41,8 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
 	libload.Do(func() {
 		frlib = model.GetFaceRecognitionLib()
+		t = frlib.GetTrainer()
+		t.Train()
 	})
 
 	defer func() {
