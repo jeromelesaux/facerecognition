@@ -38,7 +38,7 @@ func NewLDA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	for i := 0; i < len(pcaTrain); i++ {
 		key := pcaTrain[i].Label
 		meanTotal.PlusEqual(pcaTrain[i].Matrix)
-		if _, ok := mmap[key]; ok {
+		if _, ok := mmap[key]; !ok {
 			temp := make([]algorithm.Matrix, 0)
 			temp = append(temp, *pcaTrain[i].Matrix)
 			mmap[key] = temp

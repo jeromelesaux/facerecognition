@@ -5,6 +5,12 @@ import (
 	"github.com/jeromelesaux/facerecognition/logger"
 )
 
+var (
+	LPPFeatureType = "LPP"
+	PCAFeatureType = "PCA"
+	LDAFeatureType = "LDA"
+)
+
 type Trainer struct {
 	Metric            func(a, b *algorithm.Matrix) float64
 	FeatureType       string
@@ -45,15 +51,15 @@ func (t *Trainer) Train() {
 		return
 	}
 	switch t.FeatureType {
-	case "PCA":
+	case PCAFeatureType:
 		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = p.FeatureExtraction
 		break
-	case "LDA":
+	case LDAFeatureType:
 		l := NewLDA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
 		break
-	case "LPP":
+	case LPPFeatureType:
 		l := NewLPP(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
 		break

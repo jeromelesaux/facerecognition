@@ -52,7 +52,7 @@ func main() {
 		}
 		if *recognize != false {
 			lib := model.GetFaceRecognitionLib()
-			t := lib.GetTrainer("PCA")
+			t := lib.GetTrainer(model.PCAFeatureType)
 			t.Train()
 			for _, i := range imagesfiles {
 				f, err := os.Open(i)

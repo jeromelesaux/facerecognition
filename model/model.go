@@ -304,18 +304,18 @@ func (frl *FaceRecognitionLib) ImportIntoDB(face *facedetector.FaceDetector, use
 	return user
 }
 
-func (frl *FaceRecognitionLib) Train(modelType string) {
-	t := frl.GetTrainer(modelType)
+func (frl *FaceRecognitionLib) Train(featureType string) {
+	t := frl.GetTrainer(featureType)
 	t.Train()
 }
 
-func (frl *FaceRecognitionLib) GetTrainer(modelType string) *Trainer {
+func (frl *FaceRecognitionLib) GetTrainer(featureType string) *Trainer {
 	// recuperation du nombre minimal d'image d'entrainement pour
 	// determiner numOfComponents
 	// et ne pas insérer l'image d'un utilisateur sir numOfComponents est
 	// dépassé pour cet utilisateur.
 	getDistanceFunc := &L1{}
-	t := NewTrainerArgs(modelType, len(frl.Items), len(frl.Items)+1, getDistanceFunc.GetDistance)
+	t := NewTrainerArgs(featureType, len(frl.Items), len(frl.Items)+1, getDistanceFunc.GetDistance)
 
 	for username, user := range frl.Items {
 		numOfComponents := 0

@@ -69,7 +69,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 			img, err := imageFromMultipart(part)
 			if err == nil {
 				mats, files := frlib.FindFace(&img)
-				frlib.Train("PCA")
+				frlib.Train(model.PCAFeatureType)
 				if len(mats) == 0 {
 					mats = append(mats, frlib.MatrixNVectorize(&img))
 				}
