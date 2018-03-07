@@ -9,6 +9,10 @@ import (
 	"testing"
 )
 
+func init() {
+	model.SetAndLoad("../config.json")
+}
+
 func TestBarrackObamaDetection(t *testing.T) {
 	userslib := model.GetFaceRecognitionLib()
 	f, err := os.Open("images/barack.png")
@@ -50,4 +54,11 @@ func TestBarrackTrainer(t *testing.T) {
 		trainer.Add(mat.Vectorize(), "barrack")
 	}
 
+}
+
+func TestDrawFoundFaces(t *testing.T) {
+	userslib := model.GetFaceRecognitionLib()
+	f, _ := os.Open("images/barack.png")
+	img, _, _ := image.Decode(f)
+	userslib.FindFace(&img)
 }

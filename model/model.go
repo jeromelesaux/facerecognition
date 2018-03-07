@@ -70,7 +70,9 @@ func GetFaceRecognitionLib() *FaceRecognitionLib {
 		}
 		lib.load()
 	})
-	lib.NormalizeImageLength()
+	if len(lib.Items) > 0 {
+		lib.NormalizeImageLength()
+	}
 	return lib
 }
 
@@ -86,7 +88,7 @@ func (frl *FaceRecognitionLib) load() {
 		logger.Log(err.Error())
 		return
 	}
-	frl.MinimalNumOfComponents = len(frl.Items)
+	//frl.MinimalNumOfComponents = len(frl.Items)
 }
 
 func (frl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
@@ -123,7 +125,7 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 		go func() {
 			defer wc.Done()
 			for _, img := range user.TrainingImages {
-				logger.Log("Image loaded : " + img + " for user " + user.GetKey())
+				//logger.Log("Image loaded : " + img + " for user " + user.GetKey())
 				f, err := os.Open(img)
 				if err == nil {
 					defer f.Close()
@@ -131,7 +133,7 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 					if err == nil {
 						imgWidth := i.Bounds().Max.X
 						imgHeight := i.Bounds().Max.Y
-						logger.Log("image size : " + strconv.Itoa(imgWidth) + "," + strconv.Itoa(imgHeight))
+						//logger.Log("image size : " + strconv.Itoa(imgWidth) + "," + strconv.Itoa(imgHeight))
 						if imgWidth < width {
 							width = imgWidth
 						}
@@ -154,7 +156,7 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 }
 
 func normalizeImage(frl *FaceRecognitionLib, path string) {
-	logger.Log("Normalized image " + path + " with size width " + strconv.Itoa(frl.Width) + " and height " + strconv.Itoa(frl.Height))
+	//logger.Log("Normalized image " + path + " with size width " + strconv.Itoa(frl.Width) + " and height " + strconv.Itoa(frl.Height))
 	f, err := os.Open(path)
 	if err == nil {
 		defer f.Close()
@@ -219,6 +221,12 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 			filesnames = append(filesnames, newFilename)
 		}()
 	}
+	
+	
+	filename := GetConfig().GetTmpDirectory() + "final-faces-found.png"
+	fdst, _ := os.Create(filename)
+			defer fdst.Close()
+			png.Encode(fdst,fd.DrawFaces())
 	wc.Wait()
 	return mats, filesnames
 }

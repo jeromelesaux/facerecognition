@@ -89,7 +89,7 @@ func TestDetectGeorge(t *testing.T) {
 
 func TestDetectAndTrainBarrack(t *testing.T) {
 	ul := model.GetFaceRecognitionLib()
-	fc := facedetector.NewFaceDetector("images/trainingset-barrack.png")
+	fc := facedetector.NewFaceDetector("images/trainingset-barrack.png","haarcascade_frontalface_default.xml")
 	barrack := model.NewFaceRecognitionItem()
 	barrack.User.FirstName = "Barrack"
 	barrack.User.LastName = "Obama"
