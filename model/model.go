@@ -12,6 +12,7 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
@@ -36,7 +37,7 @@ func (u *User) Key() string {
 
 type FaceRecognitionItem struct {
 	User           User     `json:"user"`
-	TrainingImages []string `json:"training_images"`
+	TrainingImages []string `-`
 }
 
 type FaceRecognitionLib struct {
@@ -53,7 +54,7 @@ var (
 )
 
 func NewFaceRecognitionLib() *FaceRecognitionLib {
-	return &FaceRecognitionLib{Items: make(map[string]*FaceRecognitionItem, 0)}
+	return &FaceRecognitionLib{Items: make(map[string]*FaceRecognitionItem, 0), MinimalNumOfComponents: 10}
 }
 
 func GetFaceRecognitionLib() *FaceRecognitionLib {
@@ -76,19 +77,51 @@ func GetFaceRecognitionLib() *FaceRecognitionLib {
 	return lib
 }
 
-func (frl *FaceRecognitionLib) load() {
+func (fl *FaceRecognitionLib) load() {
 	f, err := os.Open(GetConfig().GetDataLib())
 	if err != nil {
 		logger.Log(err.Error())
 		return
 	}
 	defer f.Close()
-	err = json.NewDecoder(f).Decode(frl)
+	err = json.NewDecoder(f).Decode(fl)
 	if err != nil {
 		logger.Log(err.Error())
 		return
 	}
+	fl.loadItems()
+
 	//frl.MinimalNumOfComponents = len(frl.Items)
+}
+func (fl *FaceRecognitionLib) loadItems() {
+	for key, _ := range fl.Items {
+		userDir := fl.Items[key].GetKey()
+		directoryToScan := GetConfig().GetFaceRecognitionBasePath() + userDir
+		fs, err := ioutil.ReadDir(directoryToScan)
+		if err != nil {
+			logger.Logf("error while scanning directory %s, with error :%v", directoryToScan, err)
+			continue
+		}
+
+		diff := fl.MinimalNumOfComponents - len(fs)
+		for _, file := range fs {
+			filePath := directoryToScan + separator + file.Name()
+			//logger.Logf("adding to %s file %s", key, filePath)
+			fl.Items[key].TrainingImages = append(fl.Items[key].TrainingImages, filePath)
+		}
+		// to be compliant with the number of MinimalNumOfComponents
+		if diff > 0 {
+			i := diff
+			for i > 0 {
+				for j := len(fs) - 1; j >= 0 && i > 0; j-- {
+					filePath := directoryToScan + separator + fs[j].Name()
+					logger.Logf("extra adding to %s file %s", key, filePath)
+					fl.Items[key].TrainingImages = append(fl.Items[key].TrainingImages, filePath)
+					i--
+				}
+			}
+		}
+	}
 }
 
 func (frl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
@@ -221,12 +254,13 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 			filesnames = append(filesnames, newFilename)
 		}()
 	}
-	
-	
+
 	filename := GetConfig().GetTmpDirectory() + "final-faces-found.png"
 	fdst, _ := os.Create(filename)
-			defer fdst.Close()
-			png.Encode(fdst,fd.DrawFaces())
+	defer fdst.Close()
+	if err := png.Encode(fdst, fd.DrawFaces()); err != nil {
+		logger.Logf("%v", err)
+	}
 	wc.Wait()
 	return mats, filesnames
 }

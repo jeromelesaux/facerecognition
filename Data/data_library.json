@@ -1,1 +1,247 @@
-{"facerecognition_lib":{"s1.train":{"user":{"first_name":"s1","last_name":"train"},"training_images":["Data/s1.train/1.pgm","Data/s1.train/2.pgm","Data/s1.train/3.pgm","Data/s1.train/4.pgm","Data/s1.train/5.pgm","Data/s1.train/6.pgm","Data/s1.train/7.pgm","Data/s1.train/8.pgm","Data/s1.train/9.pgm","Data/s1.train/10.pgm"]},"s10.train":{"user":{"first_name":"s10","last_name":"train"},"training_images":["Data/s10.train/1.pgm","Data/s10.train/2.pgm","Data/s10.train/3.pgm","Data/s10.train/4.pgm","Data/s10.train/5.pgm","Data/s10.train/6.pgm","Data/s10.train/7.pgm","Data/s10.train/8.pgm","Data/s10.train/9.pgm","Data/s10.train/10.pgm"]},"s11.train":{"user":{"first_name":"s11","last_name":"train"},"training_images":["Data/s11.train/1.pgm","Data/s11.train/2.pgm","Data/s11.train/3.pgm","Data/s11.train/4.pgm","Data/s11.train/5.pgm","Data/s11.train/6.pgm","Data/s11.train/7.pgm","Data/s11.train/8.pgm","Data/s11.train/9.pgm","Data/s11.train/10.pgm"]},"s12.train":{"user":{"first_name":"s12","last_name":"train"},"training_images":["Data/s12.train/1.pgm","Data/s12.train/2.pgm","Data/s12.train/3.pgm","Data/s12.train/4.pgm","Data/s12.train/5.pgm","Data/s12.train/6.pgm","Data/s12.train/7.pgm","Data/s12.train/8.pgm","Data/s12.train/9.pgm","Data/s12.train/10.pgm"]},"s13.train":{"user":{"first_name":"s13","last_name":"train"},"training_images":["Data/s13.train/1.pgm","Data/s13.train/2.pgm","Data/s13.train/3.pgm","Data/s13.train/4.pgm","Data/s13.train/5.pgm","Data/s13.train/6.pgm","Data/s13.train/7.pgm","Data/s13.train/8.pgm","Data/s13.train/9.pgm","Data/s13.train/10.pgm"]},"s14.train":{"user":{"first_name":"s14","last_name":"train"},"training_images":["Data/s14.train/1.pgm","Data/s14.train/2.pgm","Data/s14.train/3.pgm","Data/s14.train/4.pgm","Data/s14.train/5.pgm","Data/s14.train/6.pgm","Data/s14.train/7.pgm","Data/s14.train/8.pgm","Data/s14.train/9.pgm","Data/s14.train/10.pgm"]},"s15.train":{"user":{"first_name":"s15","last_name":"train"},"training_images":["Data/s15.train/1.pgm","Data/s15.train/2.pgm","Data/s15.train/3.pgm","Data/s15.train/4.pgm","Data/s15.train/5.pgm","Data/s15.train/6.pgm","Data/s15.train/7.pgm","Data/s15.train/8.pgm","Data/s15.train/9.pgm","Data/s15.train/10.pgm"]},"s16.train":{"user":{"first_name":"s16","last_name":"train"},"training_images":["Data/s16.train/1.pgm","Data/s16.train/2.pgm","Data/s16.train/3.pgm","Data/s16.train/4.pgm","Data/s16.train/5.pgm","Data/s16.train/6.pgm","Data/s16.train/7.pgm","Data/s16.train/8.pgm","Data/s16.train/9.pgm","Data/s16.train/10.pgm"]},"s17.train":{"user":{"first_name":"s17","last_name":"train"},"training_images":["Data/s17.train/1.pgm","Data/s17.train/2.pgm","Data/s17.train/3.pgm","Data/s17.train/4.pgm","Data/s17.train/5.pgm","Data/s17.train/6.pgm","Data/s17.train/7.pgm","Data/s17.train/8.pgm","Data/s17.train/9.pgm","Data/s17.train/10.pgm"]},"s18.train":{"user":{"first_name":"s18","last_name":"train"},"training_images":["Data/s18.train/1.pgm","Data/s18.train/2.pgm","Data/s18.train/3.pgm","Data/s18.train/4.pgm","Data/s18.train/5.pgm","Data/s18.train/6.pgm","Data/s18.train/7.pgm","Data/s18.train/8.pgm","Data/s18.train/9.pgm","Data/s18.train/10.pgm"]},"s19.train":{"user":{"first_name":"s19","last_name":"train"},"training_images":["Data/s19.train/1.pgm","Data/s19.train/2.pgm","Data/s19.train/3.pgm","Data/s19.train/4.pgm","Data/s19.train/5.pgm","Data/s19.train/6.pgm","Data/s19.train/7.pgm","Data/s19.train/8.pgm","Data/s19.train/9.pgm","Data/s19.train/10.pgm"]},"s2.train":{"user":{"first_name":"s2","last_name":"train"},"training_images":["Data/s2.train/1.pgm","Data/s2.train/2.pgm","Data/s2.train/3.pgm","Data/s2.train/4.pgm","Data/s2.train/5.pgm","Data/s2.train/6.pgm","Data/s2.train/7.pgm","Data/s2.train/8.pgm","Data/s2.train/9.pgm","Data/s2.train/10.pgm"]},"s21.train":{"user":{"first_name":"s21","last_name":"train"},"training_images":["Data/s21.train/1.pgm","Data/s21.train/2.pgm","Data/s21.train/3.pgm","Data/s21.train/4.pgm","Data/s21.train/5.pgm","Data/s21.train/6.pgm","Data/s21.train/7.pgm","Data/s21.train/8.pgm","Data/s21.train/9.pgm","Data/s21.train/10.pgm"]},"s22.train":{"user":{"first_name":"s22","last_name":"train"},"training_images":["Data/s22.train/1.pgm","Data/s22.train/2.pgm","Data/s22.train/3.pgm","Data/s22.train/4.pgm","Data/s22.train/5.pgm","Data/s22.train/6.pgm","Data/s22.train/7.pgm","Data/s22.train/8.pgm","Data/s22.train/9.pgm","Data/s22.train/10.pgm"]},"s23.train":{"user":{"first_name":"s23","last_name":"train"},"training_images":["Data/s23.train/1.pgm","Data/s23.train/2.pgm","Data/s23.train/3.pgm","Data/s23.train/4.pgm","Data/s23.train/5.pgm","Data/s23.train/6.pgm","Data/s23.train/7.pgm","Data/s23.train/8.pgm","Data/s23.train/9.pgm","Data/s23.train/10.pgm"]},"s25.train":{"user":{"first_name":"s25","last_name":"train"},"training_images":["Data/s25.train/1.pgm","Data/s25.train/2.pgm","Data/s25.train/3.pgm","Data/s25.train/4.pgm","Data/s25.train/5.pgm","Data/s25.train/6.pgm","Data/s25.train/7.pgm","Data/s25.train/8.pgm","Data/s25.train/9.pgm","Data/s25.train/10.pgm"]},"s26.train":{"user":{"first_name":"s26","last_name":"train"},"training_images":["Data/s26.train/1.pgm","Data/s26.train/2.pgm","Data/s26.train/3.pgm","Data/s26.train/4.pgm","Data/s26.train/5.pgm","Data/s26.train/6.pgm","Data/s26.train/7.pgm","Data/s26.train/8.pgm","Data/s26.train/9.pgm","Data/s26.train/10.pgm"]},"s27.train":{"user":{"first_name":"s27","last_name":"train"},"training_images":["Data/s27.train/1.pgm","Data/s27.train/2.pgm","Data/s27.train/3.pgm","Data/s27.train/4.pgm","Data/s27.train/5.pgm","Data/s27.train/6.pgm","Data/s27.train/7.pgm","Data/s27.train/8.pgm","Data/s27.train/9.pgm","Data/s27.train/10.pgm"]},"s28.train":{"user":{"first_name":"s28","last_name":"train"},"training_images":["Data/s28.train/1.pgm","Data/s28.train/2.pgm","Data/s28.train/3.pgm","Data/s28.train/4.pgm","Data/s28.train/5.pgm","Data/s28.train/6.pgm","Data/s28.train/7.pgm","Data/s28.train/8.pgm","Data/s28.train/9.pgm","Data/s28.train/10.pgm"]},"s29.train":{"user":{"first_name":"s29","last_name":"train"},"training_images":["Data/s29.train/1.pgm","Data/s29.train/2.pgm","Data/s29.train/3.pgm","Data/s29.train/4.pgm","Data/s29.train/5.pgm","Data/s29.train/6.pgm","Data/s29.train/7.pgm","Data/s29.train/8.pgm","Data/s29.train/9.pgm","Data/s29.train/10.pgm"]},"s3.train":{"user":{"first_name":"s3","last_name":"train"},"training_images":["Data/s3.train/1.pgm","Data/s3.train/2.pgm","Data/s3.train/3.pgm","Data/s3.train/4.pgm","Data/s3.train/5.pgm","Data/s3.train/6.pgm","Data/s3.train/7.pgm","Data/s3.train/8.pgm","Data/s3.train/9.pgm","Data/s3.train/10.pgm"]},"s30.train":{"user":{"first_name":"s30","last_name":"train"},"training_images":["Data/s30.train/1.pgm","Data/s30.train/2.pgm","Data/s30.train/3.pgm","Data/s30.train/4.pgm","Data/s30.train/5.pgm","Data/s30.train/6.pgm","Data/s30.train/7.pgm","Data/s30.train/8.pgm","Data/s30.train/9.pgm","Data/s30.train/10.pgm"]},"s31.train":{"user":{"first_name":"s31","last_name":"train"},"training_images":["Data/s31.train/1.pgm","Data/s31.train/2.pgm","Data/s31.train/3.pgm","Data/s31.train/4.pgm","Data/s31.train/5.pgm","Data/s31.train/6.pgm","Data/s31.train/7.pgm","Data/s31.train/8.pgm","Data/s31.train/9.pgm","Data/s31.train/10.pgm"]},"s32.train":{"user":{"first_name":"s32","last_name":"train"},"training_images":["Data/s32.train/1.pgm","Data/s32.train/2.pgm","Data/s32.train/3.pgm","Data/s32.train/4.pgm","Data/s32.train/5.pgm","Data/s32.train/6.pgm","Data/s32.train/7.pgm","Data/s32.train/8.pgm","Data/s32.train/9.pgm","Data/s32.train/10.pgm"]},"s33.train":{"user":{"first_name":"s33","last_name":"train"},"training_images":["Data/s33.train/1.pgm","Data/s33.train/2.pgm","Data/s33.train/3.pgm","Data/s33.train/4.pgm","Data/s33.train/5.pgm","Data/s33.train/6.pgm","Data/s33.train/7.pgm","Data/s33.train/8.pgm","Data/s33.train/9.pgm","Data/s33.train/10.pgm"]},"s34.train":{"user":{"first_name":"s34","last_name":"train"},"training_images":["Data/s34.train/1.pgm","Data/s34.train/2.pgm","Data/s34.train/3.pgm","Data/s34.train/4.pgm","Data/s34.train/5.pgm","Data/s34.train/6.pgm","Data/s34.train/7.pgm","Data/s34.train/8.pgm","Data/s34.train/9.pgm","Data/s34.train/10.pgm"]},"s35.train":{"user":{"first_name":"s35","last_name":"train"},"training_images":["Data/s35.train/1.pgm","Data/s35.train/2.pgm","Data/s35.train/3.pgm","Data/s35.train/4.pgm","Data/s35.train/5.pgm","Data/s35.train/6.pgm","Data/s35.train/7.pgm","Data/s35.train/8.pgm","Data/s35.train/9.pgm","Data/s35.train/10.pgm"]},"s36.train":{"user":{"first_name":"s36","last_name":"train"},"training_images":["Data/s36.train/1.pgm","Data/s36.train/2.pgm","Data/s36.train/3.pgm","Data/s36.train/4.pgm","Data/s36.train/5.pgm","Data/s36.train/6.pgm","Data/s36.train/7.pgm","Data/s36.train/8.pgm","Data/s36.train/9.pgm","Data/s36.train/10.pgm"]},"s37.train":{"user":{"first_name":"s37","last_name":"train"},"training_images":["Data/s37.train/1.pgm","Data/s37.train/2.pgm","Data/s37.train/3.pgm","Data/s37.train/4.pgm","Data/s37.train/5.pgm","Data/s37.train/6.pgm","Data/s37.train/7.pgm","Data/s37.train/8.pgm","Data/s37.train/9.pgm","Data/s37.train/10.pgm"]},"s38.train":{"user":{"first_name":"s38","last_name":"train"},"training_images":["Data/s38.train/1.pgm","Data/s38.train/2.pgm","Data/s38.train/3.pgm","Data/s38.train/4.pgm","Data/s38.train/5.pgm","Data/s38.train/6.pgm","Data/s38.train/7.pgm","Data/s38.train/8.pgm","Data/s38.train/9.pgm","Data/s38.train/10.pgm"]},"s39.train":{"user":{"first_name":"s39","last_name":"train"},"training_images":["Data/s39.train/1.pgm","Data/s39.train/2.pgm","Data/s39.train/3.pgm","Data/s39.train/4.pgm","Data/s39.train/5.pgm","Data/s39.train/6.pgm","Data/s39.train/7.pgm","Data/s39.train/8.pgm","Data/s39.train/9.pgm","Data/s39.train/10.pgm"]},"s4.train":{"user":{"first_name":"s4","last_name":"train"},"training_images":["Data/s4.train/1.pgm","Data/s4.train/2.pgm","Data/s4.train/3.pgm","Data/s4.train/4.pgm","Data/s4.train/5.pgm","Data/s4.train/6.pgm","Data/s4.train/7.pgm","Data/s4.train/8.pgm","Data/s4.train/9.pgm","Data/s4.train/10.pgm"]},"s40.train":{"user":{"first_name":"s40","last_name":"train"},"training_images":["Data/s40.train/1.pgm","Data/s40.train/2.pgm","Data/s40.train/3.pgm","Data/s40.train/4.pgm","Data/s40.train/5.pgm","Data/s40.train/6.pgm","Data/s40.train/7.pgm","Data/s40.train/8.pgm","Data/s40.train/9.pgm","Data/s40.train/10.pgm"]},"s5.train":{"user":{"first_name":"s5","last_name":"train"},"training_images":["Data/s5.train/1.pgm","Data/s5.train/2.pgm","Data/s5.train/3.pgm","Data/s5.train/4.pgm","Data/s5.train/5.pgm","Data/s5.train/6.pgm","Data/s5.train/7.pgm","Data/s5.train/8.pgm","Data/s5.train/9.pgm","Data/s5.train/10.pgm"]},"s6.train":{"user":{"first_name":"s6","last_name":"train"},"training_images":["Data/s6.train/1.pgm","Data/s6.train/2.pgm","Data/s6.train/3.pgm","Data/s6.train/4.pgm","Data/s6.train/5.pgm","Data/s6.train/6.pgm","Data/s6.train/7.pgm","Data/s6.train/8.pgm","Data/s6.train/9.pgm","Data/s6.train/10.pgm"]},"s77.train":{"user":{"first_name":"s7","last_name":"train"},"training_images":["Data/s7.train/1.pgm","Data/s7.train/2.pgm","Data/s7.train/3.pgm","Data/s7.train/4.pgm","Data/s7.train/5.pgm","Data/s7.train/6.pgm","Data/s7.train/7.pgm","Data/s7.train/8.pgm","Data/s7.train/9.pgm","Data/s7.train/10.pgm"]},"s8.train":{"user":{"first_name":"s8","last_name":"train"},"training_images":["Data/s8.train/1.pgm","Data/s8.train/2.pgm","Data/s8.train/3.pgm","Data/s8.train/4.pgm","Data/s8.train/5.pgm","Data/s8.train/6.pgm","Data/s8.train/7.pgm","Data/s8.train/8.pgm","Data/s8.train/9.pgm","Data/s8.train/10.pgm"]},"s9.train":{"user":{"first_name":"s9","last_name":"train"},"training_images":["Data/s9.train/1.pgm","Data/s9.train/2.pgm","Data/s9.train/3.pgm","Data/s9.train/4.pgm","Data/s9.train/5.pgm","Data/s9.train/6.pgm","Data/s9.train/7.pgm","Data/s9.train/8.pgm","Data/s9.train/9.pgm","Data/s9.train/10.pgm"]}},"MinimalNumOfComponents":10,"Width":92,"Height":92}
+{
+    "facerecognition_lib": {
+        "Barrak.Obama": {
+            "user": {
+                "first_name": "Barrak",
+                "last_name": "Obama"
+            }
+        },
+        "Brad.Pitt": {
+            "user": {
+                "first_name": "Brad",
+                "last_name": "Pitt"
+            }
+        },
+        "s1.train": {
+            "user": {
+                "first_name": "s1",
+                "last_name": "train"
+            }
+        },
+        "s10.train": {
+            "user": {
+                "first_name": "s10",
+                "last_name": "train"
+            }
+        },
+        "s11.train": {
+            "user": {
+                "first_name": "s11",
+                "last_name": "train"
+            }
+        },
+        "s12.train": {
+            "user": {
+                "first_name": "s12",
+                "last_name": "train"
+            }
+        },
+        "s13.train": {
+            "user": {
+                "first_name": "s13",
+                "last_name": "train"
+            }
+        },
+        "s14.train": {
+            "user": {
+                "first_name": "s14",
+                "last_name": "train"
+            }
+        },
+        "s15.train": {
+            "user": {
+                "first_name": "s15",
+                "last_name": "train"
+            }
+        },
+        "s16.train": {
+            "user": {
+                "first_name": "s16",
+                "last_name": "train"
+            }
+        },
+        "s17.train": {
+            "user": {
+                "first_name": "s17",
+                "last_name": "train"
+            }
+        },
+        "s18.train": {
+            "user": {
+                "first_name": "s18",
+                "last_name": "train"
+            }
+        },
+        "s19.train": {
+            "user": {
+                "first_name": "s19",
+                "last_name": "train"
+            }
+        },
+        "s2.train": {
+            "user": {
+                "first_name": "s2",
+                "last_name": "train"
+            }
+        },
+        "s21.train": {
+            "user": {
+                "first_name": "s21",
+                "last_name": "train"
+            }
+        },
+        "s22.train": {
+            "user": {
+                "first_name": "s22",
+                "last_name": "train"
+            }
+        },
+        "s23.train": {
+            "user": {
+                "first_name": "s23",
+                "last_name": "train"
+            }
+        },
+        "s25.train": {
+            "user": {
+                "first_name": "s25",
+                "last_name": "train"
+            }
+        },
+        "s26.train": {
+            "user": {
+                "first_name": "s26",
+                "last_name": "train"
+            }
+        },
+        "s27.train": {
+            "user": {
+                "first_name": "s27",
+                "last_name": "train"
+            }
+        },
+        "s28.train": {
+            "user": {
+                "first_name": "s28",
+                "last_name": "train"
+            }
+        },
+        "s29.train": {
+            "user": {
+                "first_name": "s29",
+                "last_name": "train"
+            }
+        },
+        "s3.train": {
+            "user": {
+                "first_name": "s3",
+                "last_name": "train"
+            }
+        },
+        "s30.train": {
+            "user": {
+                "first_name": "s30",
+                "last_name": "train"
+            }
+        },
+        "s31.train": {
+            "user": {
+                "first_name": "s31",
+                "last_name": "train"
+            }
+        },
+        "s32.train": {
+            "user": {
+                "first_name": "s32",
+                "last_name": "train"
+            }
+        },
+        "s33.train": {
+            "user": {
+                "first_name": "s33",
+                "last_name": "train"
+            }
+        },
+        "s34.train": {
+            "user": {
+                "first_name": "s34",
+                "last_name": "train"
+            }
+        },
+        "s35.train": {
+            "user": {
+                "first_name": "s35",
+                "last_name": "train"
+            }
+        },
+        "s36.train": {
+            "user": {
+                "first_name": "s36",
+                "last_name": "train"
+            }
+        },
+        "s37.train": {
+            "user": {
+                "first_name": "s37",
+                "last_name": "train"
+            }
+        },
+        "s38.train": {
+            "user": {
+                "first_name": "s38",
+                "last_name": "train"
+            }
+        },
+        "s39.train": {
+            "user": {
+                "first_name": "s39",
+                "last_name": "train"
+            }
+        },
+        "s4.train": {
+            "user": {
+                "first_name": "s4",
+                "last_name": "train"
+            }
+        },
+        "s40.train": {
+            "user": {
+                "first_name": "s40",
+                "last_name": "train"
+            }
+        },
+        "s5.train": {
+            "user": {
+                "first_name": "s5",
+                "last_name": "train"
+            }
+        },
+        "s6.train": {
+            "user": {
+                "first_name": "s6",
+                "last_name": "train"
+            }
+        },
+        "s77.train": {
+            "user": {
+                "first_name": "s7",
+                "last_name": "train"
+            }
+        },
+        "s8.train": {
+            "user": {
+                "first_name": "s8",
+                "last_name": "train"
+            }
+        },
+        "s9.train": {
+            "user": {
+                "first_name": "s9",
+                "last_name": "train"
+            }
+        }
+    },
+    "MinimalNumOfComponents": 10,
+    "Width": 92,
+    "Height": 92
+}

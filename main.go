@@ -91,6 +91,8 @@ func main() {
 				if *httpport != "" {
 					http.HandleFunc("/train", web.Training)
 					http.HandleFunc("/compare", web.Compare)
+					http.HandleFunc("/listpersons", web.ListPersons)
+					http.HandleFunc("/person", web.GetPerson)
 					http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./static"))))
 					err := http.ListenAndServe(":"+*httpport, nil)
 					if err != nil {

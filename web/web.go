@@ -21,12 +21,27 @@ import (
 )
 
 type FaceRecognitionResponse struct {
-	Error            string     `json:"error,ompitempty"`
+	Error            string     `json:"error,omitempty"`
 	User             model.User `json:"user"`
 	Average          string     `json:"average"`
 	FaceDetected     []string   `json:"faces_detected"`
 	PersonRecognized string     `json:"person_recognized"`
 	Distance         float64    `json:"distance"`
+}
+
+type PersonResponse struct {
+	FirstName string   `json:"first_name"`
+	LastName  string   `json:"last_name"`
+	Faces     []string `json:"faces, omitempty"`
+}
+
+type LibraryResponse struct {
+	Error   string           `json:"error,omitempty"`
+	Persons []PersonResponse `json:"persons"`
+}
+
+func NewLibraryResponse() *LibraryResponse {
+	return &LibraryResponse{Persons: make([]PersonResponse, 0)}
 }
 
 var (
@@ -35,15 +50,61 @@ var (
 	libload sync.Once
 )
 
-func Compare(w http.ResponseWriter, r *http.Request) {
-	var err error
-	//user := &model.User{}
-	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
+func load() {
 	libload.Do(func() {
 		frlib = model.GetFaceRecognitionLib()
 		t = frlib.GetTrainer("PCA")
 		t.Train()
 	})
+}
+
+func GetPerson(w http.ResponseWriter, r *http.Request) {
+	load()
+	key, ok := r.URL.Query()["id"]
+	if !ok {
+		w.WriteHeader(404)
+		sendJson(w, "not found")
+	}
+	for _, v := range frlib.Items {
+		if v.GetKey() == key[0] {
+			p := PersonResponse{FirstName: v.User.FirstName, LastName: v.User.LastName}
+			for _, f := range v.TrainingImages {
+				p.Faces = append(p.Faces, fileToBase64(f))
+			}
+			w.WriteHeader(200)
+			sendJson(w, p)
+			return
+		}
+	}
+	w.WriteHeader(404)
+	sendJson(w, "not found")
+}
+
+func ListPersons(w http.ResponseWriter, r *http.Request) {
+	load()
+	response := NewLibraryResponse()
+
+	defer func() {
+		w.WriteHeader(200)
+		sendJson(w, response)
+	}()
+
+	for _, v := range frlib.Items {
+		p := PersonResponse{FirstName: v.User.FirstName, LastName: v.User.LastName}
+
+		/*for _,f := range v.TrainingImages {
+			p.Faces = append(p.Faces,fileToBase64(f))
+		}*/
+		response.Persons = append(response.Persons, p)
+	}
+
+}
+
+func Compare(w http.ResponseWriter, r *http.Request) {
+	load()
+	var err error
+	//user := &model.User{}
+	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
 
 	defer func() {
 		w.WriteHeader(200)
@@ -82,7 +143,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 						if len(files) == 0 {
 							response.Average = imageToBase64(&img)
 						} else {
-							response.Average = fileToBase64(files[0])
+							response.Average = fileToBase64(model.GetConfig().GetTmpDirectory() + "final-faces-found.png")
 						}
 						for _, f := range frlib.Items[p].TrainingImages {
 							response.FaceDetected = append(response.FaceDetected, fileToBase64(f))
@@ -98,6 +159,7 @@ func Compare(w http.ResponseWriter, r *http.Request) {
 }
 
 func Training(w http.ResponseWriter, r *http.Request) {
+	load()
 	var err error
 	user := &model.User{}
 	response := &FaceRecognitionResponse{}
@@ -185,9 +247,13 @@ func faceVectorToBase64(f *algorithm.Matrix) string {
 func fileToBase64(f string) string {
 	fh, _ := os.Open(f)
 	defer fh.Close()
-	img, _, _ := image.Decode(fh)
+	img, _, err := image.Decode(fh)
+	if err != nil {
+		logger.Log(err.Error())
+	}
+
 	buf := new(bytes.Buffer)
-	err := png.Encode(buf, img)
+	err = png.Encode(buf, img)
 	if err != nil {
 		logger.Log(err.Error())
 	}
