@@ -99,10 +99,3 @@ func TestDetectAndTrainBarrack(t *testing.T) {
 	}
 	//os.RemoveAll("Data")
 }
-
-func TestDetectFaceWomen(t *testing.T) {
-	uf := model.NewFaceRecognitionItem()
-	uf.DetectFaces([]string{"images/32m54jg7.jpg"})
-
-	t.Logf("%v", uf.User)
-}

@@ -57,8 +57,15 @@ func TestBarrackTrainer(t *testing.T) {
 }
 
 func TestDrawFoundFaces(t *testing.T) {
-	userslib := model.GetFaceRecognitionLib()
+	lib := model.GetFaceRecognitionLib()
 	f, _ := os.Open("images/barack.png")
 	img, _, _ := image.Decode(f)
-	userslib.FindFace(&img)
+	matrices, _ := lib.FindFace(&img)
+	trainer := lib.GetTrainer(model.PCAFeatureType)
+	trainer.Train()
+	for _, v := range matrices {
+		result, distance := trainer.Recognize(v)
+		t.Logf("results : %s for distance %f\n", result, distance)
+	}
+
 }

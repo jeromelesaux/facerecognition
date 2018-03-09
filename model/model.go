@@ -54,7 +54,12 @@ var (
 )
 
 func NewFaceRecognitionLib() *FaceRecognitionLib {
-	return &FaceRecognitionLib{Items: make(map[string]*FaceRecognitionItem, 0), MinimalNumOfComponents: 10}
+	return &FaceRecognitionLib{
+		Items: make(map[string]*FaceRecognitionItem, 0),
+		MinimalNumOfComponents: 10,
+		Width:  92,
+		Height: 92,
+	}
 }
 
 func GetFaceRecognitionLib() *FaceRecognitionLib {
@@ -179,8 +184,6 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 		}()
 	}
 	wc.Wait()
-	frl.Width = width
-	frl.Height = width
 	for _, user := range frl.Items {
 		for _, img := range user.TrainingImages {
 			normalizeImage(frl, img)
