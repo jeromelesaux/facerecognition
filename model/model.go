@@ -356,8 +356,9 @@ func (frl *FaceRecognitionLib) GetTrainer(featureType string) *Trainer {
 	// determiner numOfComponents
 	// et ne pas insérer l'image d'un utilisateur sir numOfComponents est
 	// dépassé pour cet utilisateur.
+	// K's choice explained here http://sebastianraschka.com/Articles/2014_pca_step_by_step.html
 	getDistanceFunc := &L1{}
-	t := NewTrainerArgs(featureType, len(frl.Items), len(frl.Items)+1, getDistanceFunc.GetDistance)
+	t := NewTrainerArgs(featureType, 2, len(frl.Items)+1, getDistanceFunc.GetDistance)
 
 	for username, user := range frl.Items {
 		numOfComponents := 0
