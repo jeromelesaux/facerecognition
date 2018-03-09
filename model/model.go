@@ -132,7 +132,11 @@ func (fl *FaceRecognitionLib) loadItems() {
 }
 
 func (fl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
+	if old, ok := fl.Items[u.GetKey()]; ok {
+		u.TrainingImages = append(u.TrainingImages, old.TrainingImages...)
+	}
 	fl.Items[u.GetKey()] = u
+
 	if len(u.TrainingImages) > 0 && len(u.TrainingImages) < 4 {
 		fl.MinimalNumOfComponents = len(u.TrainingImages)
 	}

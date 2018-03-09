@@ -46,7 +46,7 @@ init: clean
 		@echo "    Init of the project"
 
 execute:
-		./${EXEC}-${VERSION}
+		./${EXEC}-${VERSION} -config config.json -httpport 8083
 
 clean:
 		@if [ -f "${EXEC}-${VERSION}" ] ; then rm ${EXEC}-${VERSION} ; fi
