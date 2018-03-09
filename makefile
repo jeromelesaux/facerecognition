@@ -18,7 +18,7 @@ BUILD_TIME=`date +%FT%T%z`
 PACKAGES := fmt github.com/KatyBlumer/Go-Eigenface-Face-Distance/eigenface github.com/KatyBlumer/Go-Eigenface-Face-Distance/faceimage github.com/jbuchbinder/gopnm github.com/disintegration/imaging github.com/cnf/structhash
 
 
-LIBS=
+LIBS=-ldflags "-w"
 
 LDFLAGS=
 

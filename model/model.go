@@ -85,13 +85,13 @@ func GetFaceRecognitionLib() *FaceRecognitionLib {
 func (fl *FaceRecognitionLib) load() {
 	f, err := os.Open(GetConfig().GetDataLib())
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot open datalib %s , error :%v", GetConfig().GetDataLib(), err.Error())
 		return
 	}
 	defer f.Close()
 	err = json.NewDecoder(f).Decode(fl)
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot not decode configuration file %s, error :%v", GetConfig().GetDataLib(), err.Error())
 		return
 	}
 	fl.loadItems()
@@ -109,9 +109,11 @@ func (fl *FaceRecognitionLib) loadItems() {
 		}
 
 		diff := fl.MinimalNumOfComponents - len(fs)
-		for _, file := range fs {
+		for i, file := range fs {
+			if i >= fl.MinimalNumOfComponents {
+				break
+			}
 			filePath := directoryToScan + separator + file.Name()
-			//logger.Logf("adding to %s file %s", key, filePath)
 			fl.Items[key].TrainingImages = append(fl.Items[key].TrainingImages, filePath)
 		}
 		// to be compliant with the number of MinimalNumOfComponents
@@ -129,41 +131,40 @@ func (fl *FaceRecognitionLib) loadItems() {
 	}
 }
 
-func (frl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
-	frl.Items[u.GetKey()] = u
+func (fl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
+	fl.Items[u.GetKey()] = u
 	if len(u.TrainingImages) > 0 && len(u.TrainingImages) < 4 {
-		frl.MinimalNumOfComponents = len(u.TrainingImages)
+		fl.MinimalNumOfComponents = len(u.TrainingImages)
 	}
-	frl.save()
+	fl.save()
 }
 
-func (frl *FaceRecognitionLib) save() {
+func (fl *FaceRecognitionLib) save() {
 	userLibLock.Lock()
 	defer userLibLock.Unlock()
 	f, err := os.Create(GetConfig().GetDataLib())
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot create datalib %s, error:%v", GetConfig().GetDataLib(), err.Error())
 		return
 	}
 	defer f.Close()
-	err = json.NewEncoder(f).Encode(frl)
+	err = json.NewEncoder(f).Encode(fl)
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot encode to json datalib file %s, with error %v", GetConfig().GetDataLib(), err.Error())
 		return
 	}
 }
 
-func (frl *FaceRecognitionLib) NormalizeImageLength() {
+func (fl *FaceRecognitionLib) NormalizeImageLength() {
 	width := 100000
 	height := 100000
 	var wc sync.WaitGroup
 
-	for _, user := range frl.Items {
+	for _, user := range fl.Items {
 		wc.Add(1)
 		go func() {
 			defer wc.Done()
 			for _, img := range user.TrainingImages {
-				//logger.Log("Image loaded : " + img + " for user " + user.GetKey())
 				f, err := os.Open(img)
 				if err == nil {
 					defer f.Close()
@@ -171,7 +172,6 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 					if err == nil {
 						imgWidth := i.Bounds().Max.X
 						imgHeight := i.Bounds().Max.Y
-						//logger.Log("image size : " + strconv.Itoa(imgWidth) + "," + strconv.Itoa(imgHeight))
 						if imgWidth < width {
 							width = imgWidth
 						}
@@ -184,51 +184,50 @@ func (frl *FaceRecognitionLib) NormalizeImageLength() {
 		}()
 	}
 	wc.Wait()
-	for _, user := range frl.Items {
+	for _, user := range fl.Items {
 		for _, img := range user.TrainingImages {
-			normalizeImage(frl, img)
+			normalizeImage(fl, img)
 		}
 	}
 }
 
-func normalizeImage(frl *FaceRecognitionLib, path string) {
-	//logger.Log("Normalized image " + path + " with size width " + strconv.Itoa(frl.Width) + " and height " + strconv.Itoa(frl.Height))
+func normalizeImage(fl *FaceRecognitionLib, path string) {
 	f, err := os.Open(path)
 	if err == nil {
 		defer f.Close()
 		i, _, err := image.Decode(f)
 		if err == nil {
-			ir := resize.Resize(uint(frl.Width), uint(frl.Height), i, resize.Lanczos3)
+			ir := resize.Resize(uint(fl.Width), uint(fl.Height), i, resize.Lanczos3)
 			fw, err := os.Create(path)
 			if err == nil {
 				defer fw.Close()
 				err = pnm.Encode(fw, ir, pnm.PGM)
 				if err != nil {
-					logger.Log(err.Error())
+					logger.Logf("cannot encode to pnm file %s with error %v", path, err.Error())
 				}
 			} else {
-				logger.Log(err.Error())
+				logger.Logf("cannot create file %s with error %v", path, err.Error())
 			}
 		} else {
-			logger.Log(err.Error())
+			logger.Logf("cannot decode image file %s, with error :%v", path, err.Error())
 		}
 	}
 }
 
-func (frl *FaceRecognitionLib) MatrixNVectorize(img *image.Image) *algorithm.Matrix {
+func (fl *FaceRecognitionLib) MatrixNVectorize(img *image.Image) *algorithm.Matrix {
 	filename := GetConfig().GetTmpDirectory() + "raw.pgm"
 	f, err := os.Create(filename)
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot create file %s with error %v", filename, err.Error())
 		return &algorithm.Matrix{}
 	}
 	defer f.Close()
 	pnm.Encode(f, *img, pnm.PGM)
-	normalizeImage(frl, filename)
+	normalizeImage(fl, filename)
 	return ToMatrix(filename).Vectorize()
 }
 
-func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, []string) {
+func (fl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, []string) {
 	mats := make([]*algorithm.Matrix, 0)
 	filesnames := make([]string, 0)
 	fd := facedetector.NewFaceDetector(*img, GetConfig().FaceDetectionConfigurationFile)
@@ -237,7 +236,6 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 	for i, r := range fd.GetFaces() {
 		wc.Add(1)
 		go func() {
-			logger.Logf("%v", r)
 			defer wc.Done()
 			b := make([]byte, 16)
 			rand.Read(b)
@@ -252,7 +250,7 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 			logger.Log("File " + filename + "saved as png.")
 			newFilename := ToPgm(filename)
 			os.Remove(filename)
-			normalizeImage(frl, newFilename)
+			normalizeImage(fl, newFilename)
 			mats = append(mats, ToMatrix(newFilename).Vectorize())
 			filesnames = append(filesnames, newFilename)
 		}()
@@ -262,7 +260,7 @@ func (frl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, 
 	fdst, _ := os.Create(filename)
 	defer fdst.Close()
 	if err := png.Encode(fdst, fd.DrawFaces()); err != nil {
-		logger.Logf("%v", err)
+		logger.Logf("cannot encode to png file %s with error : %v", filename, err)
 	}
 	wc.Wait()
 	return mats, filesnames
@@ -338,37 +336,36 @@ func (fi *FaceRecognitionItem) DetectFaces(images []string) int {
 	return len(fi.TrainingImages)
 }
 
-func (frl *FaceRecognitionLib) ImportIntoDB(face *facedetector.FaceDetector, user *FaceRecognitionItem) *FaceRecognitionItem {
+func (fl *FaceRecognitionLib) ImportIntoDB(face *facedetector.FaceDetector, user *FaceRecognitionItem) *FaceRecognitionItem {
 	basePath := GetConfig().GetFaceRecognitionBasePath() + user.GetKey() + string(filepath.Separator)
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		os.MkdirAll(basePath, os.ModePerm)
 	}
-
 	user.storeImages(face, basePath)
-	frl.AddUserFace(user)
+	fl.AddUserFace(user)
 	return user
 }
 
-func (frl *FaceRecognitionLib) Train(featureType string) {
-	t := frl.GetTrainer(featureType)
+func (fl *FaceRecognitionLib) Train(featureType string) {
+	t := fl.GetTrainer(featureType)
 	t.Train()
 }
 
-func (frl *FaceRecognitionLib) GetTrainer(featureType string) *Trainer {
+func (fl *FaceRecognitionLib) GetTrainer(featureType string) *Trainer {
 	// recuperation du nombre minimal d'image d'entrainement pour
 	// determiner numOfComponents
 	// et ne pas insérer l'image d'un utilisateur sir numOfComponents est
 	// dépassé pour cet utilisateur.
 	// K's choice explained here http://sebastianraschka.com/Articles/2014_pca_step_by_step.html
 	getDistanceFunc := &L1{}
-	t := NewTrainerArgs(featureType, 2, len(frl.Items)+1, getDistanceFunc.GetDistance)
+	t := NewTrainerArgs(featureType, 2, len(fl.Items)+1, getDistanceFunc.GetDistance)
 
-	for username, user := range frl.Items {
+	for username, user := range fl.Items {
 		numOfComponents := 0
 		if len(user.TrainingImages) > 0 {
 			for _, path := range user.TrainingImages {
 				numOfComponents++
-				if numOfComponents > frl.MinimalNumOfComponents {
+				if numOfComponents > fl.MinimalNumOfComponents {
 					break
 				} else {
 					t.Add(ToMatrix(path).Vectorize(), username)
@@ -384,7 +381,6 @@ func SumPixels(face []float64, width int, height int) float64 {
 	for i := 0; i < (width * height); i++ {
 		sum += face[i]
 	}
-
 	return math.Abs(sum / float64(width*height) / 0xffff)
 }
 
@@ -395,10 +391,9 @@ func SaveImageTo(img *image.Gray16, path string) {
 		return
 	}
 	defer out.Close()
-
 	err = png.Encode(out, img)
 	if err != nil {
-		logger.Log(err.Error())
+		logger.Logf("cannot encode to png file %s, with error %v", path, err.Error())
 		return
 	}
 }
