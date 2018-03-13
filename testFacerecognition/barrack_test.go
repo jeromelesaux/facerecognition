@@ -1,6 +1,7 @@
 package testFacerecognition
 
 import (
+	"fmt"
 	"github.com/jeromelesaux/facerecognition/logger"
 	"github.com/jeromelesaux/facerecognition/model"
 	"image"
@@ -11,6 +12,13 @@ import (
 
 func init() {
 	model.SetAndLoad("../config.json")
+	fl := model.NewFaceRecognitionLib()
+	for i := 1; i < 41; i++ {
+		key := fmt.Sprintf("s%d.train", i)
+		firstname := fmt.Sprintf("s%d", i)
+		fl.Items[key] = &model.FaceRecognitionItem{User: model.User{FirstName: firstname, LastName: "train"}}
+	}
+	fl.Save()
 }
 
 func TestBarrackObamaDetection(t *testing.T) {
@@ -56,7 +64,7 @@ func TestBarrackTrainer(t *testing.T) {
 
 }
 
-func TestDrawFoundFaces(t *testing.T) {
+/*func TestDrawFoundFaces(t *testing.T) {
 	lib := model.GetFaceRecognitionLib()
 	f, _ := os.Open("images/barack.png")
 	img, _, _ := image.Decode(f)
@@ -69,3 +77,4 @@ func TestDrawFoundFaces(t *testing.T) {
 	}
 
 }
+*/

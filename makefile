@@ -63,3 +63,7 @@ audit:   ${EXEC}
 test: $(EXEC)
 		@GOOS=${GOOS} GOARCH=${GOARCH} go test -v ./...
 		@echo " Tests OK."
+
+performance: ${EXEC}
+		@go test -run=^BenchmarkPerformanceRecognition$  -bench=. -cpuprofile=cpu.out github.com/jeromelesaux/facerecognition/testFacerecognition
+		@go tool pprof  cpu.out

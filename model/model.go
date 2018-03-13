@@ -140,10 +140,10 @@ func (fl *FaceRecognitionLib) AddUserFace(u *FaceRecognitionItem) {
 	if len(u.TrainingImages) > 0 && len(u.TrainingImages) < 4 {
 		fl.MinimalNumOfComponents = len(u.TrainingImages)
 	}
-	fl.save()
+	fl.Save()
 }
 
-func (fl *FaceRecognitionLib) save() {
+func (fl *FaceRecognitionLib) Save() {
 	userLibLock.Lock()
 	defer userLibLock.Unlock()
 	f, err := os.Create(GetConfig().GetDataLib())

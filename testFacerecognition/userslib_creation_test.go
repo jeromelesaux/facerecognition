@@ -1,6 +1,7 @@
 package testFacerecognition
 
 import (
+	"fmt"
 	"github.com/jeromelesaux/facedetection/facedetector"
 	"github.com/jeromelesaux/facerecognition/model"
 	_ "image/png"
@@ -87,6 +88,17 @@ func TestDetectGeorge(t *testing.T) {
 //	ul.RecognizeFace("images/barack.png")
 //}
 
+func init() {
+	model.SetAndLoad("../config.json")
+
+	fl := model.NewFaceRecognitionLib()
+	for i := 1; i < 41; i++ {
+		key := fmt.Sprintf("s%d.train", i)
+		firstname := fmt.Sprintf("s%d", i)
+		fl.Items[key] = &model.FaceRecognitionItem{User: model.User{FirstName: firstname, LastName: "train"}}
+	}
+	fl.Save()
+}
 func TestDetectAndTrainBarrack(t *testing.T) {
 	ul := model.GetFaceRecognitionLib()
 	fc := facedetector.NewFaceDetector("images/trainingset-barrack.png", "haarcascade_frontalface_default.xml")
