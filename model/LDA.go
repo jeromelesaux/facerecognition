@@ -52,7 +52,7 @@ func NewLDA(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 
 	sw := algorithm.NewMatrix(n-c, n-c)
 	sb := algorithm.NewMatrix(n-c, n-c)
-	for key, _ := range mmap {
+	for key := range mmap {
 		matrixWithinThatClass := mmap[key]
 		meanOfCurrentClass := l.GetMean(matrixWithinThatClass)
 		for i := 0; i < len(matrixWithinThatClass); i++ {

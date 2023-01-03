@@ -1,18 +1,20 @@
 package algorithm
 
 import (
-	"github.com/jeromelesaux/facerecognition/logger"
 	"math"
+
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
-/** Cholesky Decomposition.
-  <P>
-  For a symmetric, positive definite matrix A, the Cholesky decomposition
-  is an lower triangular matrix L so that A = L*L'.
-  <P>
-  If the matrix is not symmetric or positive definite, the constructor
-  returns a partial decomposition and sets an internal flag that may
-  be queried by the isSPD() method.
+/*
+  - Cholesky Decomposition.
+    <P>
+    For a symmetric, positive definite matrix A, the Cholesky decomposition
+    is an lower triangular matrix L so that A = L*L'.
+    <P>
+    If the matrix is not symmetric or positive definite, the constructor
+    returns a partial decomposition and sets an internal flag that may
+    be queried by the isSPD() method.
 */
 type CholeskyDecomposition struct {
 	L     [][]float64 // Array for internal storage of decomposition.
@@ -26,7 +28,7 @@ func NewCholeskyDecomposition(matrix *Matrix) *CholeskyDecomposition {
 	for i := 0; i < c.N; i++ {
 		c.L[i] = make([]float64, c.N)
 	}
-	//double[][] A = Arg.getArray();
+	// double[][] A = Arg.getArray();
 
 	// Main loop.
 	for j := 0; j < c.N; j++ {
@@ -58,7 +60,8 @@ func (c *CholeskyDecomposition) GetL() *Matrix {
 	return mat
 }
 
-/** Solve A*X = B
+/*
+* Solve A*X = B
 @param  B   A Matrix with as many rows as A and any number of columns.
 @return     X so that L*L'*X = B
 @exception  IllegalArgumentException  Matrix row dimensions must agree.
@@ -73,9 +76,8 @@ func (c *CholeskyDecomposition) Solve(B *Matrix) *Matrix {
 		return &Matrix{}
 	}
 
-	var X [][]float64
 	// Copy right hand side.
-	X = make([][]float64, B.M)
+	X := make([][]float64, B.M)
 
 	for i := 0; i < B.M; i++ {
 		X[i] = make([]float64, B.N)

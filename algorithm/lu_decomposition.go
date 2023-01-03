@@ -133,7 +133,8 @@ func (lud *LUDecomposition) IsNonsingular() bool {
 	return true
 }
 
-/** Return lower triangular factor
+/*
+* Return lower triangular factor
 @return     L
 */
 func (lud *LUDecomposition) GetL() *Matrix {
@@ -156,7 +157,8 @@ func (lud *LUDecomposition) GetL() *Matrix {
 	return x
 }
 
-/** Return upper triangular factor
+/*
+* Return upper triangular factor
 @return     U
 */
 func (lud *LUDecomposition) GetU() *Matrix {
@@ -186,7 +188,8 @@ func (lud *LUDecomposition) GetPivot() []int {
 	return p
 }
 
-/** Return pivot permutation vector as a one-dimensional double array
+/*
+* Return pivot permutation vector as a one-dimensional double array
 @return     (double) piv
 */
 func (lud *LUDecomposition) GetDoublePivot() []float64 {
@@ -197,7 +200,8 @@ func (lud *LUDecomposition) GetDoublePivot() []float64 {
 	return vals
 }
 
-/** Determinant
+/*
+* Determinant
 @return     det(A)
 */
 func (lud *LUDecomposition) Det() float64 {

@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/jeromelesaux/facerecognition/algorithm"
-	"github.com/jeromelesaux/facerecognition/logger"
-	"github.com/jeromelesaux/facerecognition/model"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -18,6 +15,10 @@ import (
 	"os"
 	"strconv"
 	"sync"
+
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
+	"github.com/jeromelesaux/facerecognition/model"
 )
 
 type FaceRecognitionResponse struct {
@@ -32,7 +33,7 @@ type FaceRecognitionResponse struct {
 type PersonResponse struct {
 	FirstName string   `json:"first_name"`
 	LastName  string   `json:"last_name"`
-	Faces     []string `json:"faces, omitempty"`
+	Faces     []string `json:"faces"`
 }
 
 type LibraryResponse struct {
@@ -97,13 +98,12 @@ func ListPersons(w http.ResponseWriter, r *http.Request) {
 		}*/
 		response.Persons = append(response.Persons, p)
 	}
-
 }
 
 func Compare(w http.ResponseWriter, r *http.Request) {
 	load()
 	var err error
-	//user := &model.User{}
+	// user := &model.User{}
 	response := &FaceRecognitionResponse{PersonRecognized: "Not recognized"}
 
 	defer func() {
@@ -173,7 +173,6 @@ func Training(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	mr, err := r.MultipartReader()
-
 	if err != nil {
 		response.Error = err.Error()
 		return
@@ -189,7 +188,6 @@ func Training(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if name := part.FormName(); name != "" {
-
 			switch name {
 			case "first_name":
 				user.FirstName = stringFromMultipart(part)
@@ -205,7 +203,6 @@ func Training(w http.ResponseWriter, r *http.Request) {
 				}
 
 			}
-
 		}
 	}
 	logger.Log(user.Key())
@@ -223,7 +220,6 @@ func Training(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.User = *user
-	return
 }
 
 func sendJson(w http.ResponseWriter, i interface{}) {

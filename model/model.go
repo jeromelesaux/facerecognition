@@ -3,16 +3,10 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jbuchbinder/gopnm"
-	"github.com/jeromelesaux/facedetection/facedetector"
-	"github.com/jeromelesaux/facerecognition/algorithm"
-	"github.com/jeromelesaux/facerecognition/logger"
-	"github.com/nfnt/resize"
 	"image"
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
@@ -20,6 +14,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	pnm "github.com/jbuchbinder/gopnm"
+	"github.com/jeromelesaux/facedetection/facedetector"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
+	"github.com/nfnt/resize"
 )
 
 type User struct {
@@ -37,7 +37,7 @@ func (u *User) Key() string {
 
 type FaceRecognitionItem struct {
 	User           User     `json:"user"`
-	TrainingImages []string `-`
+	TrainingImages []string `json:"_"`
 }
 
 type FaceRecognitionLib struct {
@@ -55,24 +55,29 @@ var (
 
 func NewFaceRecognitionLib() *FaceRecognitionLib {
 	return &FaceRecognitionLib{
-		Items: make(map[string]*FaceRecognitionItem, 0),
+		Items:                  make(map[string]*FaceRecognitionItem, 0),
 		MinimalNumOfComponents: 10,
-		Width:  92,
-		Height: 92,
+		Width:                  92,
+		Height:                 92,
 	}
 }
 
 func GetFaceRecognitionLib() *FaceRecognitionLib {
-
 	loadUserLibOnce.Do(func() {
 		lib = NewFaceRecognitionLib()
 		_, err := os.Stat(GetConfig().GetDataLib())
 		if err != nil {
-			os.MkdirAll(GetConfig().GetDataLib(), os.ModePerm)
+			err = os.MkdirAll(GetConfig().GetDataLib(), os.ModePerm)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error while creating directories [%s] : %v\n", GetConfig().GetDataLib(), err)
+			}
 		}
 		_, err = os.Stat(GetConfig().GetTmpDirectory())
 		if err != nil {
-			os.MkdirAll(GetConfig().GetTmpDirectory(), os.ModePerm)
+			err = os.MkdirAll(GetConfig().GetTmpDirectory(), os.ModePerm)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error while creating directories [%s] : %v\n", GetConfig().GetTmpDirectory(), err)
+			}
 		}
 		lib.load()
 	})
@@ -96,13 +101,14 @@ func (fl *FaceRecognitionLib) load() {
 	}
 	fl.loadItems()
 
-	//frl.MinimalNumOfComponents = len(frl.Items)
+	// frl.MinimalNumOfComponents = len(frl.Items)
 }
+
 func (fl *FaceRecognitionLib) loadItems() {
-	for key, _ := range fl.Items {
+	for key := range fl.Items {
 		userDir := fl.Items[key].GetKey()
 		directoryToScan := GetConfig().GetFaceRecognitionBasePath() + userDir
-		fs, err := ioutil.ReadDir(directoryToScan)
+		fs, err := os.ReadDir(directoryToScan)
 		if err != nil {
 			logger.Logf("error while scanning directory %s, with error :%v", directoryToScan, err)
 			continue
@@ -166,9 +172,9 @@ func (fl *FaceRecognitionLib) NormalizeImageLength() {
 
 	for _, user := range fl.Items {
 		wc.Add(1)
-		go func() {
+		go func(item *FaceRecognitionItem) {
 			defer wc.Done()
-			for _, img := range user.TrainingImages {
+			for _, img := range item.TrainingImages {
 				f, err := os.Open(img)
 				if err == nil {
 					defer f.Close()
@@ -185,7 +191,7 @@ func (fl *FaceRecognitionLib) NormalizeImageLength() {
 					}
 				}
 			}
-		}()
+		}(user)
 	}
 	wc.Wait()
 	for _, user := range fl.Items {
@@ -226,7 +232,10 @@ func (fl *FaceRecognitionLib) MatrixNVectorize(img *image.Image) *algorithm.Matr
 		return &algorithm.Matrix{}
 	}
 	defer f.Close()
-	pnm.Encode(f, *img, pnm.PGM)
+	err = pnm.Encode(f, *img, pnm.PGM)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while encoding png file [%s] : %v\n", filename, err)
+	}
 	normalizeImage(fl, filename)
 	return ToMatrix(filename).Vectorize()
 }
@@ -239,7 +248,7 @@ func (fl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, [
 
 	for i, r := range fd.GetFaces() {
 		wc.Add(1)
-		go func() {
+		go func(r *facedetector.FoundRect, index int) {
 			defer wc.Done()
 			b := make([]byte, 16)
 			rand.Read(b)
@@ -247,17 +256,23 @@ func (fl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, [
 			dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
 			dst := image.NewRGBA(dstRect)
 			draw.Draw(dst, dstRect, fd.Image, image.Point{r.X, r.Y}, draw.Src)
-			filename := GetConfig().GetTmpDirectory() + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
+			filename := GetConfig().GetTmpDirectory() + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(index) + ".png"
 			fdst, _ := os.Create(filename)
 			defer fdst.Close()
-			png.Encode(fdst, dst)
+			err := png.Encode(fdst, dst)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error while encode png file [%s], %x\n", filename, err)
+			}
 			logger.Log("File " + filename + "saved as png.")
 			newFilename := ToPgm(filename)
-			os.Remove(filename)
+			err = os.Remove(filename)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error while removing file [%s], %x\n", filename, err)
+			}
 			normalizeImage(fl, newFilename)
 			mats = append(mats, ToMatrix(newFilename).Vectorize())
 			filesnames = append(filesnames, newFilename)
-		}()
+		}(r, i)
 	}
 
 	filename := GetConfig().GetTmpDirectory() + "final-faces-found.png"
@@ -269,6 +284,7 @@ func (fl *FaceRecognitionLib) FindFace(img *image.Image) ([]*algorithm.Matrix, [
 	wc.Wait()
 	return mats, filesnames
 }
+
 func NewFaceRecognitionItem() *FaceRecognitionItem {
 	return &FaceRecognitionItem{User: User{}}
 }
@@ -281,7 +297,10 @@ func (fi *FaceRecognitionItem) DetectFacesFromImages(images []image.Image) {
 	userBasePath := GetConfig().GetFaceRecognitionBasePath() + fi.GetKey()
 	_, err := os.Stat(userBasePath)
 	if err != nil {
-		os.MkdirAll(userBasePath, os.ModePerm)
+		err = os.MkdirAll(userBasePath, os.ModePerm)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error while creating directories [%s] : %v\n", userBasePath, err)
+		}
 	}
 	for _, img := range images {
 		fd := facedetector.NewFaceDetector(img, GetConfig().FaceDetectionConfigurationFile)
@@ -295,7 +314,7 @@ func (fi *FaceRecognitionItem) storeImages(fd *facedetector.FaceDetector, basePa
 
 	for i, r := range fd.GetFaces() {
 		wc.Add(1)
-		go func() {
+		go func(r *facedetector.FoundRect, index int) {
 			defer wc.Done()
 			b := make([]byte, 16)
 			rand.Read(b)
@@ -303,37 +322,41 @@ func (fi *FaceRecognitionItem) storeImages(fd *facedetector.FaceDetector, basePa
 			dstRect := image.Rect(r.X, r.Y, (r.X + r.Width), (r.Y + r.Height))
 			dst := image.NewRGBA(dstRect)
 			draw.Draw(dst, dstRect, fd.Image, image.Point{r.X, r.Y}, draw.Src)
-			filename := basePath + string(filepath.Separator) + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(i) + ".png"
+			filename := basePath + string(filepath.Separator) + "face_" + id + "_" + strconv.Itoa(r.X) + "_" + strconv.Itoa(r.Y) + "_" + strconv.Itoa(r.Width) + "_" + strconv.Itoa(r.Height) + strconv.Itoa(index) + ".png"
 			fdst, _ := os.Create(filename)
 			defer fdst.Close()
-			png.Encode(fdst, dst)
+			err := png.Encode(fdst, dst)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error while encoding png file [%s] : %v\n", filename, err)
+			}
 			logger.Log("File " + filename + "saved as png.")
 			newFilename := ToPgm(filename)
 			fi.TrainingImages = append(fi.TrainingImages, newFilename)
 			os.Remove(filename)
 			logger.Log("File " + filename + " removed")
-		}()
+		}(r, i)
 	}
 	wc.Wait()
-	return
 }
 
 func (fi *FaceRecognitionItem) DetectFaces(images []string) int {
-
 	userBasePath := GetConfig().GetFaceRecognitionBasePath() + fi.GetKey()
 	if _, err := os.Stat(userBasePath); os.IsNotExist(err) {
-		os.MkdirAll(userBasePath, os.ModePerm)
+		err = os.MkdirAll(userBasePath, os.ModePerm)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error while creating directories [%s], %x\n", userBasePath, err)
+		}
 	}
 	var wc sync.WaitGroup
 
 	for _, img := range images {
 		wc.Add(1)
-		go func() {
+		go func(imageFilename string) {
 			defer wc.Done()
-			logger.Log("Searching faces in image file : " + img)
-			fd := facedetector.NewFaceDetector(img, GetConfig().FaceDetectionConfigurationFile)
+			logger.Log("Searching faces in image file : " + imageFilename)
+			fd := facedetector.NewFaceDetector(imageFilename, GetConfig().FaceDetectionConfigurationFile)
 			fi.storeImages(fd, userBasePath)
-		}()
+		}(img)
 	}
 	logger.Log("Found " + strconv.Itoa(len(fi.TrainingImages)) + " faces.")
 	wc.Wait()
@@ -343,7 +366,10 @@ func (fi *FaceRecognitionItem) DetectFaces(images []string) int {
 func (fl *FaceRecognitionLib) ImportIntoDB(face *facedetector.FaceDetector, user *FaceRecognitionItem) *FaceRecognitionItem {
 	basePath := GetConfig().GetFaceRecognitionBasePath() + user.GetKey() + string(filepath.Separator)
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
-		os.MkdirAll(basePath, os.ModePerm)
+		err = os.MkdirAll(basePath, os.ModePerm)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error while creating directories [%s], %x\n", basePath, err)
+		}
 	}
 	user.storeImages(face, basePath)
 	fl.AddUserFace(user)

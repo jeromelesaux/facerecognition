@@ -52,12 +52,11 @@ type SingularValueDecomposition struct {
 */
 
 func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
-
 	s := &SingularValueDecomposition{M: matrix.RowsDimension(), N: matrix.ColumnsDimension()}
 	// Derived from LINPACK code.
 	// Initialize.
 
-	//double[][] A = Arg.getArrayCopy();
+	// double[][] A = Arg.getArrayCopy();
 
 	/* Apparently the failing cases are only a proper subset of (m<n),
 	   so let's not throw error.  Correct fix to come later?
@@ -291,8 +290,8 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
 						t = math.Abs(e[ks-1])
 					}
 				}
-				//double
-				//t = (ks != p ? Math.abs(e[ks]) : 0.) + (ks != k + 1 ? Math.abs(e[ks - 1]) : 0.);
+				// double
+				// t = (ks != p ? Math.abs(e[ks]) : 0.) + (ks != k + 1 ? Math.abs(e[ks - 1]) : 0.);
 				if math.Abs(s.S[ks]) <= tiny+eps*t {
 					s.S[ks] = 0.0
 					break
@@ -337,7 +336,6 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
 					}
 				}
 			}
-			break
 
 		// Split at negligible s(k).
 
@@ -361,7 +359,6 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
 					}
 				}
 			}
-			break
 
 		// Perform one qr step.
 
@@ -425,7 +422,6 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
 				e[p-2] = f
 				iter = iter + 1
 			}
-			break
 		// Convergence.
 		case 4:
 			{
@@ -469,7 +465,6 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
 				iter = 0
 				p--
 			}
-			break
 		}
 	}
 	return s
@@ -479,7 +474,8 @@ func NewSingularValueDecomposition(matrix *Matrix) *SingularValueDecomposition {
    Public Methods
  * ------------------------ */
 
-/** Return the left singular vectors
+/*
+* Return the left singular vectors
 @return     U
 */
 func (s *SingularValueDecomposition) GetU() *Matrix {
@@ -487,7 +483,8 @@ func (s *SingularValueDecomposition) GetU() *Matrix {
 	return mat
 }
 
-/** Return the right singular vectors
+/*
+* Return the right singular vectors
 @return     V
 */
 func (s *SingularValueDecomposition) GetV() *Matrix {
@@ -503,7 +500,8 @@ func (s *SingularValueDecomposition) GetSingularValues() []float64 {
 	return s.S
 }
 
-/** Return the diagonal matrix of singular values
+/*
+* Return the diagonal matrix of singular values
 @return     S
 */
 func (s *SingularValueDecomposition) GetS() *Matrix {
@@ -518,25 +516,27 @@ func (s *SingularValueDecomposition) GetS() *Matrix {
 	return X
 }
 
-/** Two norm
+/*
+* Two norm
 @return     max(S)
 */
 func (s *SingularValueDecomposition) Norm2() float64 {
 	return s.S[0]
 }
 
-/** Two norm condition number
+/*
+* Two norm condition number
 @return     max(S)/min(S)
 */
 func (s *SingularValueDecomposition) Cond() float64 {
 	return s.S[0] / s.S[minInt(s.M, s.N)-1]
 }
 
-/** Effective numerical matrix rank
+/*
+* Effective numerical matrix rank
 @return     Number of nonnegligible singular values.
 */
 func (s *SingularValueDecomposition) Rank() int {
-
 	eps := math.Pow(2.0, -52.0)
 	tol := float64(maxInt(s.M, s.N)) * s.S[0] * eps
 	r := 0

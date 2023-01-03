@@ -12,7 +12,7 @@ type LPP struct {
 
 func NewLPP(trainingSet []*algorithm.Matrix, labels []string, numOfComponents int) *LPP {
 	lpp := &LPP{FeatureExtraction: NewFeatureExtraction()}
-	//n := len(trainingSet)
+	// n := len(trainingSet)
 	tempSet := make(map[string]int)
 	for i := 0; i < len(labels); i++ {
 		if _, ok := tempSet[labels[i]]; !ok {
@@ -24,16 +24,16 @@ func NewLPP(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	c := len(tempSet)
 	// process in PCA
 	pca := NewPCA(trainingSet, labels, numOfComponents)
-	//construct the nearest neighbor graph
+	// construct the nearest neighbor graph
 	s := construcNearestNeighborGraph(pca.FeatureExtraction.ProjectedTrainingSet)
 	dd := constructD(s)
 	l := dd.Minus(s)
-	//reconstruct the trainingSet into required X;
+	// reconstruct the trainingSet into required X;
 	x := constructTrainingMatrix(pca.FeatureExtraction.ProjectedTrainingSet)
 	xlxt := x.TimesMatrix(l).TimesMatrix(x.Transpose())
 	xdxt := x.TimesMatrix(dd).TimesMatrix(x.Transpose())
 
-	//calculate the eignevalues and eigenvectors of (XDXT)^-1 * (XLXT)
+	// calculate the eignevalues and eigenvectors of (XDXT)^-1 * (XLXT)
 	targetForEigen := xdxt.Inverse().TimesMatrix(xlxt)
 	feature := targetForEigen.Eig()
 	d := feature.Getd()
@@ -46,7 +46,7 @@ func NewLPP(trainingSet []*algorithm.Matrix, labels []string, numOfComponents in
 	selectedEigenVectors := eigenVectors.GetMatrix2(0, eigenVectors.RowsDimension()-1, indexes)
 	lpp.FeatureExtraction.W = pca.FeatureExtraction.W.TimesMatrix(selectedEigenVectors)
 	lpp.FeatureExtraction.ProjectedTrainingSet = make([]*ProjectedTrainingMatrix, 0)
-	//Construct projectedTrainingMatrix
+	// Construct projectedTrainingMatrix
 	for i := 0; i < len(trainingSet); i++ {
 		ptm := NewProjectedTrainingMatrix(lpp.FeatureExtraction.W.Transpose().TimesMatrix(trainingSet[i].Minus(pca.FeatureExtraction.MeanMatrix)), labels[i])
 		lpp.FeatureExtraction.ProjectedTrainingSet = append(lpp.FeatureExtraction.ProjectedTrainingSet, ptm)
@@ -65,8 +65,8 @@ func construcNearestNeighborGraph(input []*ProjectedTrainingMatrix) *algorithm.M
 		neighbors := FindKNN(trainArray, input[i].Matrix, 3, euclidean.GetDistance)
 		hashIndexes := hashMatrices(neighbors)
 		for j := 0; j < len(neighbors); j++ {
-			hash := string(structhash.Md5(input[i], 1))
-			if index, ok := hashIndexes[hash]; ok {
+			hash := structhash.Md5(input[i], 1)
+			if index, ok := hashIndexes[string(hash)]; ok {
 				s.A[i][index] = 1.0
 				s.A[index][i] = 1.0
 			}

@@ -19,10 +19,10 @@ var (
 	cdivi = 0.0
 )
 
-//  This is derived from the Algol procedures tred2 by
-//  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
-//  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
-//  Fortran subroutine in EISPACK.
+// This is derived from the Algol procedures tred2 by
+// Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
+// Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
+// Fortran subroutine in EISPACK.
 func (e *EigenvalueDecomposition) Tred2() {
 	//logger.Log("starting tred2")
 	for j := 0; j < e.N; j++ {

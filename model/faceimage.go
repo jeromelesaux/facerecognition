@@ -2,16 +2,18 @@ package model
 
 import (
 	"bufio"
-	"github.com/disintegration/imaging"
-	"github.com/jbuchbinder/gopnm"
-	"github.com/jeromelesaux/facerecognition/algorithm"
-	"github.com/jeromelesaux/facerecognition/logger"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/disintegration/imaging"
+	pnm "github.com/jbuchbinder/gopnm"
+	"github.com/jeromelesaux/facerecognition/algorithm"
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
 var (
@@ -48,7 +50,7 @@ func ToVector(path string) (int, int, []float64) {
 	}
 	defer f.Close()
 	i, _, _ := image.Decode(f)
-	//i = Resize(i)
+	// i = Resize(i)
 	width := i.Bounds().Max.X - i.Bounds().Min.X
 	height := i.Bounds().Max.Y - i.Bounds().Min.Y
 	minX := i.Bounds().Min.X
@@ -86,20 +88,19 @@ func Resize(img image.Image) *image.NRGBA {
 	return imaging.Resize(img, Width, Height, imaging.Lanczos)
 }
 
-//
-//func ToMatrix(width, height int, face []float64) *algorithm.Matrix {
-//	m := height
-//	n := width
-//	fmt.Println(face)
-//	mat := algorithm.NewMatrix(n * m,1)
-//	for p:= 0; p < n; p++ {
-//		for  q := 0; q < m; q++ {
-//			mat.A[p*m +q][0] = face[q*p]
+//	func ToMatrix(width, height int, face []float64) *algorithm.Matrix {
+//		m := height
+//		n := width
+//		fmt.Println(face)
+//		mat := algorithm.NewMatrix(n * m,1)
+//		for p:= 0; p < n; p++ {
+//			for  q := 0; q < m; q++ {
+//				mat.A[p*m +q][0] = face[q*p]
+//			}
 //		}
+//		fmt.Println(mat)
+//		return mat
 //	}
-//	fmt.Println(mat)
-//	return mat
-//}
 func ToMatrix(path string) *algorithm.Matrix {
 	f, err := os.Open(path)
 	if err != nil {
@@ -115,7 +116,7 @@ func ToMatrix(path string) *algorithm.Matrix {
 		s := strings.Split(dimensions, " ")
 		width, _ := strconv.Atoi(s[0])
 		height, _ := strconv.Atoi(s[1])
-		//fmt.Printf("%d %d", width, height)
+		// fmt.Printf("%d %d", width, height)
 		mat := algorithm.NewMatrix(height, width)
 		bf.ReadLine()
 		for row := 0; row < height; row++ {
@@ -128,7 +129,7 @@ func ToMatrix(path string) *algorithm.Matrix {
 	} else {
 
 		i, _, _ := image.Decode(f)
-		//i = Resize(i)
+		// i = Resize(i)
 		width := i.Bounds().Max.X - i.Bounds().Min.X
 		height := i.Bounds().Max.Y - i.Bounds().Min.Y
 		minX := i.Bounds().Min.X
@@ -143,7 +144,7 @@ func ToMatrix(path string) *algorithm.Matrix {
 				pixel := color.GrayModel.Convert(c)
 				r, g, b, _ := pixel.RGBA()
 
-				//grayValue := (19595*r + 38470*g + 7471*b + 1<<15) >> 24
+				// grayValue := (19595*r + 38470*g + 7471*b + 1<<15) >> 24
 				grayValue := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
 				matrix.A[y][x] = float64(uint8(grayValue / 256))
 			}
@@ -170,7 +171,9 @@ func ToPgm(path string) string {
 	defer f2.Close()
 	imgSrc, _, _ := image.Decode(f2)
 	err = pnm.Encode(f, imgSrc, pnm.PGM)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while encoding png file [%s], %x\n", path, err)
+	}
 	logger.Log("File : " + pgmPath + " created.")
 	return pgmPath
-
 }

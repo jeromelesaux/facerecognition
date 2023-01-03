@@ -54,19 +54,20 @@ func (t *Trainer) Train() {
 	case PCAFeatureType:
 		p := NewPCA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = p.FeatureExtraction
-		break
+
 	case LDAFeatureType:
 		l := NewLDA(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
-		break
+
 	case LPPFeatureType:
 		l := NewLPP(t.TrainingSet, t.TrainingLabels, t.NumOfComponents)
 		t.FeatureExtraction = l.FeatureExtraction
-		break
+
 	}
 
 	t.Model = t.FeatureExtraction.ProjectedTrainingSet
 }
+
 func (t *Trainer) Recognize(matrix *algorithm.Matrix) (string, float64) {
 	testCase := t.FeatureExtraction.W.Transpose().TimesMatrix(matrix.Minus(t.FeatureExtraction.MeanMatrix))
 	result, similarity := AssignLabel(t.Model, testCase, t.K, t.Metric)

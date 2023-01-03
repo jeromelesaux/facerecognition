@@ -2,15 +2,16 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/jeromelesaux/facerecognition/logger"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/jeromelesaux/facerecognition/logger"
 )
 
 type Config struct {
 	FaceDetectionConfigurationFile string `json:"opencvfile"`
-	FaceRecognitionBasePath        string `json:"facerecognitionbasepath`
+	FaceRecognitionBasePath        string `json:"facerecognitionbasepath"`
 }
 
 func (conf *Config) GetDataLib() string {
