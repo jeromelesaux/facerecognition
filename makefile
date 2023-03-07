@@ -5,10 +5,10 @@ MV=mv
 
 SOURCEDIR=.
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
-GOOS=linux
-GOARCH=amd64
+#GOOS=linux
+#GOARCH=amd64
 #GOARCH=arm
-GOARM=7
+#GOARM=7
 
 
 EXEC=facerecognition
