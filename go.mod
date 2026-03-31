@@ -1,6 +1,6 @@
 module github.com/jeromelesaux/facerecognition
 
-go 1.19
+go 1.25.0
 
 require (
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
@@ -13,5 +13,5 @@ require (
 
 require (
 	github.com/harrydb/go v0.0.0-20160105214235-0ff7a05d1aa4 // indirect
-	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/image v0.38.0 // indirect
 )
